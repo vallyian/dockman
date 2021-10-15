@@ -113,6 +113,7 @@ function ls<T>(cmd: "image" | "container" | "volume" | "network", args = "") {
 function time(val: string) {
     return val
         .replace(" ago", "")
+        .replace(" seconds", "s")
         .replace(" minutes", "m")
         .replace(" hours", "h")
         .replace(" days", "d")
