@@ -1,65 +1,103 @@
-<a href="#" (click)="setView('images')">Images ({{(images || []).length}})</a>
-<a href="#" (click)="setView('containers')">Containers({{(containers || []).length}})</a>
-<a href="#" (click)="setView('volumes')">Volumes({{(volumes || []).length}})</a>
-<a href="#" (click)="setView('networks')">Networks({{(networks || []).length}})</a>
+<div class="nav">
+    <a href="#" (click)="setView('images')" [ngClass]="{ 'active': view == 'images' }">Images ({{(images ||
+        []).length}})</a>
+    <a href="#" (click)="setView('containers')" [ngClass]="{ 'active': view == 'containers' }">Containers ({{(containers
+        || []).length}})</a>
+    <a href="#" (click)="setView('volumes')" [ngClass]="{ 'active': view == 'volumes' }">Volumes ({{(volumes ||
+        []).length}})</a>
+    <a href="#" (click)="setView('networks')" [ngClass]="{ 'active': view == 'networks' }">Networks ({{(networks ||
+        []).length}})</a>
+    <span class="right" *ngIf="selectedRows.length">
+        <a href="#" (click)="start()" *ngIf="view == 'containers'">></a>
+        <a href="#" (click)="stop()" *ngIf="view == 'containers'">||</a>
+        <a href="#" (click)="remove()">x</a>
+    </span>
+</div>
 
-<table *ngIf="view == 'images'">
-    <tr>
-        <th>ID</th>
-        <th>REPOSITORY</th>
-        <th>TAG</th>
-        <th>SIZE</th>
-        <th>CREATED</th>
-    </tr>
-    <tr *ngFor="let image of (images || [])">
-        <td>{{image.ID}}</td>
-        <td>{{image.REPOSITORY}}</td>
-        <td>{{image.TAG}}</td>
-        <td>{{image.SIZE}}</td>
-        <td>{{image.CREATED}}</td>
-    </tr>
-</table>
-<table *ngIf="view == 'containers'">
-    <tr>
-        <th>ID</th>
-        <th>IMAGE</th>
-        <th>NAMES</th>
-        <th>STATUS</th>
-        <th>PORTS</th>
-        <th>COMMAND</th>
-        <th>CREATED</th>
-    </tr>
-    <tr *ngFor="let container of (containers || [])">
-        <td>{{container.ID}}</td>
-        <td>{{container.IMAGE}}</td>
-        <td>{{container.NAMES}}</td>
-        <td>{{container.STATUS}}</td>
-        <td>{{container.PORTS}}</td>
-        <td>{{container.COMMAND}}</td>
-        <td>{{container.CREATED}}</td>
-    </tr>
-</table>
-<table *ngIf="view == 'volumes'">
-    <tr>
-        <th>DRIVER</th>
-        <th>NAME</th>
-    </tr>
-    <tr *ngFor="let volume of (volumes || [])">
-        <td>{{volume.DRIVER}}</td>
-        <td>{{volume.NAME}}</td>
-    </tr>
-</table>
-<table *ngIf="view == 'networks'">
-    <tr>
-        <th>ID</th>
-        <th>NAME</th>
-        <th>DRIVER</th>
-        <th>SCOPE</th>
-    </tr>
-    <tr *ngFor="let network of (networks || [])">
-        <td>{{network.ID}}</td>
-        <td>{{network.NAME}}</td>
-        <td>{{network.DRIVER}}</td>
-        <td>{{network.SCOPE}}</td>
-    </tr>
-</table>
+<div class="content">
+    <table *ngIf="view == 'images'" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr class="sticky">
+                <!-- <th>ID</th> -->
+                <th>REPOSITORY</th>
+                <th>TAG</th>
+                <th>SIZE</th>
+                <th>CREATED</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let image of images; let row = index;" [ngClass]="{ select: selectedRows.includes(row) }"
+                (click)="selectRow(row, $event)">
+                <!-- <td>{{image.ID}}</td> -->
+                <td>{{image.REPOSITORY}}</td>
+                <td>{{image.TAG}}</td>
+                <td>{{image.SIZE}}</td>
+                <td>{{image.CREATED}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table *ngIf="view == 'containers'" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr class="sticky">
+                <!-- <th>ID</th> -->
+                <th>IMAGE</th>
+                <th>NAME</th>
+                <th>PORTS</th>
+                <!-- <th>COMMAND</th> -->
+                <th>STATUS</th>
+                <th>SIZE</th>
+                <th>CREATED</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let container of containers; let row = index;" [ngClass]="{
+                    stop: !container.UP,
+                    select: selectedRows.includes(row)
+                 }" (click)="selectRow(row, $event)">
+                <!-- <td>{{container.ID}}</td> -->
+                <td>{{container.IMAGE}}</td>
+                <td>{{container.NAMES}}</td>
+                <td><a *ngFor="let port of container.PORTS" [href]="'//localhost:' + port.split(':')[0]"
+                        target="_blank">{{port}}</a></td>
+                <!-- <td>{{container.COMMAND}}</td> -->
+                <td>{{container.STATUS}}</td>
+                <td>{{container.SIZE}}</td>
+                <td>{{container.CREATED}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table *ngIf="view == 'volumes'" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr class="sticky">
+                <th>NAME</th>
+                <th>DRIVER</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let volume of volumes; let row = index;" [ngClass]="{ select: selectedRows.includes(row) }"
+                (click)="selectRow(row, $event)">
+                <td>{{volume.NAME}}</td>
+                <td>{{volume.DRIVER}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table *ngIf="view == 'networks'" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr class="sticky">
+                <!-- <th>ID</th> -->
+                <th>NAME</th>
+                <th>DRIVER</th>
+                <!-- <th>SCOPE</th> -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let network of networks; let row = index;" [ngClass]="{ select: selectedRows.includes(row) }"
+                (click)="selectRow(row, $event)">
+                <!-- <td>{{network.ID}}</td> -->
+                <td>{{network.NAME}}</td>
+                <td>{{network.DRIVER}}</td>
+                <!-- <td>{{network.SCOPE}}</td> -->
+            </tr>
+        </tbody>
+    </table>
+</div>

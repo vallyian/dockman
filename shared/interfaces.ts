@@ -12,8 +12,10 @@ export interface Container {
     COMMAND: string;
     CREATED: string;
     STATUS: string;
-    PORTS: string;
+    UP: boolean;
+    PORTS: string[];
     NAMES: string;
+    SIZE: string;
 }
 
 export interface Volume {
