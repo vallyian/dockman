@@ -1,0 +1,10 @@
+/* https://www.typescriptlang.org/docs/handbook/compiler-options.html */
+{
+	"extends": "./tsconfig.json",
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"src/**/*.spec.ts"
+	]
+}

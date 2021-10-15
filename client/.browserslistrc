@@ -1,0 +1,23 @@
+# This file is used by the build system to adjust CSS and JS output to support the specified browsers below.
+# For additional information regarding the format and rule options, please see:
+# https://github.com/browserslist/browserslist#queries
+
+# For the full list of supported browsers by the Angular framework, please see:
+# https://angular.io/guide/browser-support
+
+## support only ES2015 browsers, as intended with tsconfig.json: "target": "ES2015"
+## read more @ https://angular.io/guide/deployment#configuring-differential-loading
+# You can see what browsers were selected by your queries by running: npx browserslist
+
+Chrome >= 61
+ChromeAndroid >= 74
+Firefox ESR
+Firefox >= 60
+FirefoxAndroid >= 66
+last 2 Edge major versions
+not IE 11
+Safari >= 11
+Opera >= 48
+Samsung >= 8
+Android >= 67
+last 2 iOS major versions

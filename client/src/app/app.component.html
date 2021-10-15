@@ -1,0 +1,65 @@
+<a href="#" (click)="setView('images')">Images ({{(images || []).length}})</a>
+<a href="#" (click)="setView('containers')">Containers({{(containers || []).length}})</a>
+<a href="#" (click)="setView('volumes')">Volumes({{(volumes || []).length}})</a>
+<a href="#" (click)="setView('networks')">Networks({{(networks || []).length}})</a>
+
+<table *ngIf="view == 'images'">
+    <tr>
+        <th>ID</th>
+        <th>REPOSITORY</th>
+        <th>TAG</th>
+        <th>SIZE</th>
+        <th>CREATED</th>
+    </tr>
+    <tr *ngFor="let image of (images || [])">
+        <td>{{image.ID}}</td>
+        <td>{{image.REPOSITORY}}</td>
+        <td>{{image.TAG}}</td>
+        <td>{{image.SIZE}}</td>
+        <td>{{image.CREATED}}</td>
+    </tr>
+</table>
+<table *ngIf="view == 'containers'">
+    <tr>
+        <th>ID</th>
+        <th>IMAGE</th>
+        <th>NAMES</th>
+        <th>STATUS</th>
+        <th>PORTS</th>
+        <th>COMMAND</th>
+        <th>CREATED</th>
+    </tr>
+    <tr *ngFor="let container of (containers || [])">
+        <td>{{container.ID}}</td>
+        <td>{{container.IMAGE}}</td>
+        <td>{{container.NAMES}}</td>
+        <td>{{container.STATUS}}</td>
+        <td>{{container.PORTS}}</td>
+        <td>{{container.COMMAND}}</td>
+        <td>{{container.CREATED}}</td>
+    </tr>
+</table>
+<table *ngIf="view == 'volumes'">
+    <tr>
+        <th>DRIVER</th>
+        <th>NAME</th>
+    </tr>
+    <tr *ngFor="let volume of (volumes || [])">
+        <td>{{volume.DRIVER}}</td>
+        <td>{{volume.NAME}}</td>
+    </tr>
+</table>
+<table *ngIf="view == 'networks'">
+    <tr>
+        <th>ID</th>
+        <th>NAME</th>
+        <th>DRIVER</th>
+        <th>SCOPE</th>
+    </tr>
+    <tr *ngFor="let network of (networks || [])">
+        <td>{{network.ID}}</td>
+        <td>{{network.NAME}}</td>
+        <td>{{network.DRIVER}}</td>
+        <td>{{network.SCOPE}}</td>
+    </tr>
+</table>

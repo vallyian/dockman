@@ -1,0 +1,9 @@
+.vscode
+!.vscode/extensions.json
+**/bin
+**/dist
+**/node_modules
+**/test-results
+
+run
+SEMVER

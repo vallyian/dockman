@@ -1,0 +1,44 @@
+/* https://www.typescriptlang.org/docs/handbook/compiler-options.html */
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "sourceMap": false,
+        "noEmitOnError": true,
+        "listEmittedFiles": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "declarationMap": false,
+        "lib": [
+            "ESNext"
+        ],
+        "noImplicitAny": true,
+        "declaration": false,
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": false,
+        "suppressImplicitAnyIndexErrors": false,
+        "alwaysStrict": true,
+        "removeComments": true,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "skipLibCheck": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
+        "noEmitHelpers": false,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "pretty": true,
+        "typeRoots": [
+            "node_modules/@types",
+            "./src/@types/index.d.ts"
+        ]
+    }
+}
