@@ -1,6 +1,6 @@
 # dockman
 
-This is a proof-of-concept / "naive" implementation of a web UI using the docker CLI.  
+This is a naive proof-of-concept implementation of a web UI using the docker CLI.  
 Do NOT expose this outside `127.0.0.1` !!!
 
 ## Prerequisites
