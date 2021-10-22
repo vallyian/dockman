@@ -53,7 +53,7 @@ COPY --from=build-server /app/bin/shared/ /shared/
 COPY --from=build-server /app/bin/app/src/ ./
 COPY --from=build-client /app/dist ./client
 HEALTHCHECK --interval=10s --timeout=1s --start-period=30s --retries=3 \
-    CMD [ $(wget --server-response localhost 2>&1 | awk '/^  HTTP/{print $2}') = 200 ] || exit 1
+    CMD [ $(wget --server-response http://localhost/health 2>&1 | awk '/^  HTTP/{print $2}') = 200 ] || exit 1
 VOLUME [ "/var/run/docker.sock" ]
 EXPOSE 80
 ENTRYPOINT [ "node" ]

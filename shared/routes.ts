@@ -1,5 +1,5 @@
 export const routes = {
-    health: "/api/health",
+    health: "/health",
     docker: {
         base: "/api/docker",
         image: {

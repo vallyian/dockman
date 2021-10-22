@@ -1,32 +1,22 @@
 # dockman
 
----
+This is a proof-of-concept / "naive" implementation of a web UI using the docker CLI.  
+Do NOT expose this outside `127.0.0.1` !!!
 
 ## Prerequisites
 
-* [Docker + WSL](https://docs.docker.com/docker-for-windows/wsl/)
-* Add `dockman` to hosts file and avoid using `localhost`
+* [Docker](https://docs.docker.com/get-docker/)
 * [Node.js v14 LTS](https://nodejs.org/en/) - only for development
-
----
 
 ## Build
 
-`docker build -t dockman .`
-
----
+* `docker build -t vallyian/dockman:latest .`
 
 ## Run
 
-`docker run --name dockman -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 --restart=always -d dockman` => [http://dockman/](http://dockman/)
+```sh
+(docker stop dockman && docker rm dockman || echo "not running") && \
+docker run --name dockman -v /var/run/docker.sock:/var/run/docker.sock -p 127.0.0.1:65535:80 --pull always --restart=always -d vallyian/dockman:latest
+```
 
-*Note*:
-If `env` folder doesn't exist, it will be created with self-signed certs and random generated secrets.  
-Services are inaccessible on the host (by design).  
-
----
-
-## Debug
-
-* `docker run --name dockman -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 -e DEBUG=* -it dockman sh`
-* attach VS Code to `dockman` container, opem Javascript debug terminal, run `node .`
+[http://localhost:65535/](http://localhost:65535/)

@@ -17,8 +17,8 @@ export async function makeApp(): Promise<express.Application> {
 
     app.use(helmet());
     app.disable("X-Powered-By");
-    app.use(express.static(env.NODE_ENV === "development" ? "../client/dist" : "./client"));
     app.use(routes.health, healthMiddleware);
+    app.use(express.static(env.NODE_ENV === "development" ? "../client/dist" : "./client"));
     app.use(urlencoded({ extended: false }));
     app.use(json());
     app.use(routes.docker.base, setDockerRoute(express.Router()));
