@@ -79,7 +79,7 @@ jobs:
                 SEMVER: ${{ needs.semver.outputs.SEMVER }}
                 DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
               run: |
-                docker tag ${DOCKER_REPO} ${DOCKER_USERNAME}/${DOCKER_REPO}:SEMVER && \
-                docker push               ${DOCKER_USERNAME}/${DOCKER_REPO}:SEMVER && \
-                docker tag ${DOCKER_REPO} ${DOCKER_USERNAME}/${DOCKER_REPO}:latest && \
+                docker tag ${DOCKER_REPO} ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} && \
+                docker push               ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} && \
+                docker tag ${DOCKER_REPO} ${DOCKER_USERNAME}/${DOCKER_REPO}:latest    && \
                 docker push               ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
