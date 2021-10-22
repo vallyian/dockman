@@ -58,28 +58,27 @@ jobs:
         needs:
             - semver
         env:
+            DOCKER_USERNAME: vallyian
             REPONAME: dockman
 
         steps:
             - uses: actions/checkout@v2
 
             - name: Build
-              run: docker build -t ${REPONAME} .
+              run: docker build -t ${DOCKER_USERNAME}/${REPONAME}:latest .
 
             - name: Log in to Docker Hub
               uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' }}
               with:
-                username: ${{ secrets.DOCKER_USERNAME }}
+                username: ${DOCKER_USERNAME}
                 password: ${{ secrets.DOCKER_PASSWORD }}
 
             - name: Publish images to Docker Hub
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' }}
               env:
                 SEMVER: ${{ needs.semver.outputs.SEMVER }}
-                USERNAME: ${{ secrets.DOCKER_USERNAME }}
               run: |
-                docker tag ${REPONAME} ${USERNAME}/${REPONAME}:SEMVER && \
-                docker push ${USERNAME}/${REPONAME}:SEMVER" && \
-                docker tag ${REPONAME} ${USERNAME}/${REPONAME}:latest && \
-                docker push ${USERNAME}/${REPONAME}:latest
+                docker tag ${REPONAME}:latest ${DOCKER_USERNAME}/${REPONAME}:SEMVER && \
+                docker push                   ${DOCKER_USERNAME}/${REPONAME}:SEMVER && \
+                docker push                   ${DOCKER_USERNAME}/${REPONAME}:latest
