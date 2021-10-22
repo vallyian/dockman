@@ -17,7 +17,7 @@ export async function makeApp(): Promise<express.Application> {
 
     app.use(helmet());
     app.disable("X-Powered-By");
-    app.use(express.static(env.CLIENT_DIST));
+    app.use(express.static(env.NODE_ENV === "development" ? "../client/dist" : "./client"));
     app.use(routes.health, healthMiddleware);
     app.use(urlencoded({ extended: false }));
     app.use(json());

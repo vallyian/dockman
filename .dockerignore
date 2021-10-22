@@ -9,7 +9,8 @@
 .editorconfig
 .gitattributes
 .gitignore
-**/docker*
+**/dockerfile
+**/docker-compose*
 **/*.md
 run
 SEMVER

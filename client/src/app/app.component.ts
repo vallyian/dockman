@@ -83,17 +83,25 @@ export class AppComponent {
         if (this.selectedRows.length === 0)
             return;
         if (this.view === "images")
-            this.http.get<boolean>(`${routes.docker.base}${routes.docker.image.rm}`)
-                .subscribe();
+            this.http.post<boolean>(
+                `${routes.docker.base}${routes.docker.image.rm}`,
+                { id: this.selectedRows.map(r => this.images[r].ID).join(" ") }
+            ).subscribe(() => this.ls("images"));
         if (this.view === "containers")
-            this.http.get<boolean>(`${routes.docker.base}${routes.docker.container.rm}`)
-                .subscribe();
+            this.http.post<boolean>(
+                `${routes.docker.base}${routes.docker.container.rm}`,
+                { id: this.selectedRows.map(r => this.containers[r].ID).join(" ") }
+            ).subscribe(() => this.ls("containers"));
         if (this.view === "volumes")
-            this.http.get<boolean>(`${routes.docker.base}${routes.docker.volume.rm}`)
-                .subscribe();
+            this.http.post<boolean>(
+                `${routes.docker.base}${routes.docker.volume.rm}`,
+                { id: this.selectedRows.map(r => this.volumes[r].NAME).join(" ") }
+            ).subscribe(() => this.ls("volumes"));
         if (this.view === "networks")
-            this.http.get<boolean>(`${routes.docker.base}${routes.docker.network.rm}`)
-                .subscribe();
+            this.http.post<boolean>(
+                `${routes.docker.base}${routes.docker.network.rm}`,
+                { id: this.selectedRows.map(r => this.networks[r].ID).join(" ") }
+            ).subscribe(() => this.ls("networks"));
     }
 
     private ls(view: View | "*") {

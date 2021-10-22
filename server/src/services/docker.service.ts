@@ -20,6 +20,11 @@ export async function imageLs(id?: string) {
     return ret;
 }
 
+export async function imageRm(id: string) {
+    let ret = child_process.execSync(`docker image rm ${id}`).toString();
+    return ret;
+}
+
 export async function containerLs(id?: string) {
     let ret = ls<Container>("container", id || "-a").map(c => {
         c.PORTS = (<string><any>c.PORTS).split(",")
@@ -57,6 +62,11 @@ export async function containerStop(id: string) {
     return ret;
 }
 
+export async function containerRm(id: string) {
+    let ret = child_process.execSync(`docker container rm ${id}`).toString();
+    return ret;
+}
+
 export async function volumeLs(id?: string) {
     let ret = ls<Volume>("volume", id);
     ret = ret.sort((a, b) => {
@@ -73,6 +83,11 @@ export async function volumeLs(id?: string) {
     return ret;
 }
 
+export async function volumeRm(id: string) {
+    let ret = child_process.execSync(`docker volume rm ${id}`).toString();
+    return ret;
+}
+
 export async function networkLs(id?: string) {
     let ret = ls<Network>("network", id).filter(n => n.NAME !== n.DRIVER && n.DRIVER !== "null");
     ret = ret.sort((a, b) => {
@@ -86,6 +101,11 @@ export async function networkLs(id?: string) {
             return 1;
         return 0;
     });
+    return ret;
+}
+
+export async function networkRm(id: string) {
+    let ret = child_process.execSync(`docker network rm ${id}`).toString();
     return ret;
 }
 
