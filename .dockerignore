@@ -12,5 +12,3 @@
 **/dockerfile
 **/docker-compose*
 **/*.md
-run
-SEMVER
