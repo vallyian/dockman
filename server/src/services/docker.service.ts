@@ -29,7 +29,7 @@ export const ls = {
             .then(c => c.map(c => {
                 c.PORTS = (<string><any>c.PORTS).split(",")
                     .reduce((ps, p) => {
-                        p = ((p.match(/0\.0\.0\.0\:(\d{1,}\-\>\d{1,})\/tcp/) || [])[1] || "").replace("->", ":");
+                        p = ((p.match(/\d+\.\d+\.\d+\.\d+\:(\d+\-\>\d+)\/tcp/) || [])[1] || "").replace("->", ":");
                         if (p) ps.push(p);
                         return ps;
                     }, new Array<string>());
