@@ -20,7 +20,6 @@
         "ng": "ng",
         "build": "ng build -c production",
         "start": "ng build --watch -c development",
-        "start:wsl": "ng build --watch -c development --poll 3000",
         "test": "ng test --code-coverage"
     },
     "dependencies": {

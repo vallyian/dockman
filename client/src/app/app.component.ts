@@ -15,8 +15,7 @@ export class AppComponent {
     containers = new Array<Container>();
     volumes = new Array<Volume>();
     networks = new Array<Network>();
-    view: View = "containers";
-    selectedRows: number[] = [];
+    selected = new Array<string>();
 
     constructor(
         private http: HttpClient
@@ -24,88 +23,127 @@ export class AppComponent {
         this.ls("*");
     }
 
-    setView(view: View) {
-        this.view = view;
-        this.ls(view);
-    }
+    private _view: View = "containers";
+    get view() { return this._view; }
+    set view(view: View) { this._view = view; this.ls(view); }
 
-    selectRow(row: number, event: MouseEvent) {
+    select(row: number, event: MouseEvent) {
+        const id = (() => {
+            switch (this.view) {
+                case "images": return this.images[row]?.ID;
+                case "containers": return this.containers[row]?.ID;
+                case "volumes": return this.volumes[row]?.NAME;
+                case "networks": return this.networks[row]?.ID;
+            }
+        })();
+        if (!id) return;
         if (event.shiftKey) {
             document.getSelection()?.empty();
-            const first = this.selectedRows[0];
-            if (first === undefined) {
-                this.selectedRows.push(row);
-            } else if (row === first) {
-                this.selectedRows = [];
-            } else {
-                while (row !== first) {
-                    this.selectedRows.push(row);
-                    if (row > first) {
-                        row--;
-                    } else {
-                        row++;
-                    }
-                }
-
-            }
+            // const first = this.selected[0];
+            // if (!first) {
+            //     this.selected.push(id);
+            // } else if (first === id) {
+            //     this.selected = [];
+            // } else {
+            //     while (first !== id) {
+            //         this.selected.push(id);
+            //         row += first < id ? -1 : 1;
+            //     }
+            // }
         } else if (event.ctrlKey) {
             document.getSelection()?.empty();
-            const index = this.selectedRows.indexOf(row);
+            const index = this.selected.indexOf(id);
             index >= 0
-                ? this.selectedRows.splice(index, 1)
-                : this.selectedRows.push(row);
+                ? this.selected.splice(index, 1)
+                : this.selected.push(id);
         } else {
-            this.selectedRows = this.selectedRows[0] === row
-                ? []
-                : [row];
+            this.selected = this.selected[0] === id ? [] : [id];
         }
     }
 
     start() {
-        if (this.view !== "containers" || this.selectedRows.length === 0)
+        if (this.view !== "containers" || this.selected.length === 0)
             return;
-        this.http.post<boolean>(
-            `${routes.docker.base}${routes.docker.container.start}`,
-            { id: this.selectedRows.map(r => this.containers[r].ID).join(" ") }
-        ).subscribe(() => this.ls("containers"));
+        let count = this.selected.length;
+        const done = (id: string) => {
+            this.selected = this.selected.filter(s => s !== id);
+            count--;
+            if (!count) this.ls("containers");
+        };
+        [...this.selected].forEach(id =>
+            this.http.get(`${routes.docker.base}${routes.docker.container.start}`.replace(":id", encodeURIComponent(id))).subscribe(
+                () => done(id),
+                () => done(id)
+            )
+        );
     }
 
     stop() {
-        if (this.view !== "containers" || this.selectedRows.length === 0)
+        if (this.view !== "containers" || this.selected.length === 0)
             return;
-        this.http.post<boolean>(
-            `${routes.docker.base}${routes.docker.container.stop}`,
-            { id: this.selectedRows.map(r => this.containers[r].ID).join(" ") }
-        ).subscribe(() => this.ls("containers"));
+        let count = this.selected.length;
+        const done = (id: string) => {
+            this.selected = this.selected.filter(s => s !== id);
+            count--;
+            if (!count) this.ls("containers");
+        };
+        [...this.selected].forEach(id =>
+            this.http.get(`${routes.docker.base}${routes.docker.container.stop}`.replace(":id", encodeURIComponent(id))).subscribe(
+                () => done(id),
+                () => done(id)
+            )
+        );
     }
 
     remove() {
-        if (this.selectedRows.length === 0)
+        if (this.selected.length === 0)
             return;
-        if (this.view === "images")
-            this.http.post<boolean>(
-                `${routes.docker.base}${routes.docker.image.rm}`,
-                { id: this.selectedRows.map(r => this.images[r].ID).join(" ") }
-            ).subscribe(() => this.ls("images"));
-        if (this.view === "containers")
-            this.http.post<boolean>(
-                `${routes.docker.base}${routes.docker.container.rm}`,
-                { id: this.selectedRows.map(r => this.containers[r].ID).join(" ") }
-            ).subscribe(() => this.ls("containers"));
-        if (this.view === "volumes")
-            this.http.post<boolean>(
-                `${routes.docker.base}${routes.docker.volume.rm}`,
-                { id: this.selectedRows.map(r => this.volumes[r].NAME).join(" ") }
-            ).subscribe(() => this.ls("volumes"));
-        if (this.view === "networks")
-            this.http.post<boolean>(
-                `${routes.docker.base}${routes.docker.network.rm}`,
-                { id: this.selectedRows.map(r => this.networks[r].ID).join(" ") }
-            ).subscribe(() => this.ls("networks"));
+        let count = this.selected.length;
+        const done = (id: string, view: View) => {
+            this.selected = this.selected.filter(s => s !== id);
+            count--;
+            if (!count) this.ls(view);
+        };
+        this.selected.forEach(id => {
+            switch (this.view) {
+                case "images": return this.http.delete(`${routes.docker.base}${routes.docker.image.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
+                    () => {
+                        this.selected = this.selected.filter(s => s !== id);
+                        this.images = this.images.filter(i => i.ID !== id);
+                        done(id, "images");
+                    },
+                    () => done(id, "images")
+                );
+                case "containers": return this.http.delete(`${routes.docker.base}${routes.docker.container.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
+                    () => {
+                        this.selected = this.selected.filter(s => s !== id);
+                        this.containers = this.containers.filter(c => c.ID !== id);
+                        done(id, "containers");
+                    },
+                    () => done(id, "containers")
+                );
+                case "volumes": return this.http.delete(`${routes.docker.base}${routes.docker.volume.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
+                    () => {
+                        this.selected = this.selected.filter(s => s !== id);
+                        this.volumes = this.volumes.filter(v => v.NAME !== id);
+                        done(id, "volumes");
+                    },
+                    () => done(id, "volumes")
+                );
+                case "networks": return this.http.delete(`${routes.docker.base}${routes.docker.network.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
+                    () => {
+                        this.selected = this.selected.filter(s => s !== id);
+                        this.networks = this.networks.filter(n => n.ID !== id);
+                        done(id, "networks");
+                    },
+                    () => done(id, "networks")
+                );
+            }
+        });
     }
 
     private ls(view: View | "*") {
-        this.selectedRows = [];
+        this.selected = [];
         if (view === "images" || view === "*")
             this.http.get<Image[]>(`${routes.docker.base}${routes.docker.image.ls}`)
                 .subscribe(images => this.images = images);

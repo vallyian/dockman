@@ -1,13 +1,13 @@
 <div class="nav">
-    <a href="#" (click)="setView('images')" [ngClass]="{ 'active': view == 'images' }">Images ({{(images ||
+    <a href="#" (click)="view = 'images'" [ngClass]="{ 'active': view === 'images' }">Images ({{(images ||
         []).length}})</a>
-    <a href="#" (click)="setView('containers')" [ngClass]="{ 'active': view == 'containers' }">Containers ({{(containers
+    <a href="#" (click)="view = 'containers'" [ngClass]="{ 'active': view === 'containers' }">Containers ({{(containers
         || []).length}})</a>
-    <a href="#" (click)="setView('volumes')" [ngClass]="{ 'active': view == 'volumes' }">Volumes ({{(volumes ||
+    <a href="#" (click)="view = 'volumes'" [ngClass]="{ 'active': view === 'volumes' }">Volumes ({{(volumes ||
         []).length}})</a>
-    <a href="#" (click)="setView('networks')" [ngClass]="{ 'active': view == 'networks' }">Networks ({{(networks ||
+    <a href="#" (click)="view = 'networks'" [ngClass]="{ 'active': view === 'networks' }">Networks ({{(networks ||
         []).length}})</a>
-    <span class="right" *ngIf="selectedRows.length">
+    <span class="right" *ngIf="selected.length">
         <a href="#" (click)="start()" *ngIf="view == 'containers'">></a>
         <a href="#" (click)="stop()" *ngIf="view == 'containers'">||</a>
         <a href="#" (click)="remove()">x</a>
@@ -26,8 +26,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let image of images; let row = index;" [ngClass]="{ select: selectedRows.includes(row) }"
-                (click)="selectRow(row, $event)">
+            <tr *ngFor="let image of images; let row = index;" [ngClass]="{ select: selected.includes(image.ID) }"
+                (click)="select(row, $event)">
                 <!-- <td>{{image.ID}}</td> -->
                 <td>{{image.REPOSITORY}}</td>
                 <td>{{image.TAG}}</td>
@@ -52,8 +52,8 @@
         <tbody>
             <tr *ngFor="let container of containers; let row = index;" [ngClass]="{
                     stop: !container.UP,
-                    select: selectedRows.includes(row)
-                 }" (click)="selectRow(row, $event)">
+                    select: selected.includes(container.ID)
+                 }" (click)="select(row, $event)">
                 <!-- <td>{{container.ID}}</td> -->
                 <td>{{container.IMAGE}}</td>
                 <td>{{container.NAMES}}</td>
@@ -74,8 +74,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let volume of volumes; let row = index;" [ngClass]="{ select: selectedRows.includes(row) }"
-                (click)="selectRow(row, $event)">
+            <tr *ngFor="let volume of volumes; let row = index;" [ngClass]="{ select: selected.includes(volume.NAME) }"
+                (click)="select(row, $event)">
                 <td>{{volume.NAME}}</td>
                 <td>{{volume.DRIVER}}</td>
             </tr>
@@ -91,8 +91,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let network of networks; let row = index;" [ngClass]="{ select: selectedRows.includes(row) }"
-                (click)="selectRow(row, $event)">
+            <tr *ngFor="let network of networks; let row = index;" [ngClass]="{ select: selected.includes(network.ID) }"
+                (click)="select(row, $event)">
                 <!-- <td>{{network.ID}}</td> -->
                 <td>{{network.NAME}}</td>
                 <td>{{network.DRIVER}}</td>

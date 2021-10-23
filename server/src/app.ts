@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as helmet from "helmet";
-import { urlencoded, json } from "body-parser";
+// import { urlencoded, json } from "body-parser";
 import { routes } from "../../shared/routes";
 import setDockerRoute from "./routes/docker.route";
 import errorMiddleware from "./middleware/error.middleware";
@@ -19,8 +19,8 @@ export async function makeApp(): Promise<express.Application> {
     app.disable("X-Powered-By");
     app.use(routes.health, healthMiddleware);
     app.use(express.static(env.NODE_ENV === "development" ? "../client/dist" : "./client"));
-    app.use(urlencoded({ extended: false }));
-    app.use(json());
+    // app.use(urlencoded({ extended: false }));
+    // app.use(json());
     app.use(routes.docker.base, setDockerRoute(express.Router()));
     app.use(notFoundMiddleware);
     app.use(errorMiddleware);

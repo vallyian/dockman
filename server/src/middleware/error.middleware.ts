@@ -11,10 +11,7 @@ export default function (err: Error, req: Request, res: Response, _next: NextFun
     const errJson = {
         status: (<any>err).status || 500,
         message: err.message || "internal server error",
-        stack: env.NODE_ENV === "development" ? (err.stack || "").split(/\n/g).filter(l => !!l.trim()) : undefined,
-    };
-
-    console.log("E", JSON.stringify({
+        ...(env.NODE_ENV === "development" ? { stack: (err.stack || "").split(/\n/g).filter(l => !!l.trim()) } : {}),
         hostname: req.hostname,
         method: req.method,
         url: req.url,
@@ -24,10 +21,11 @@ export default function (err: Error, req: Request, res: Response, _next: NextFun
             return req.headers;
         })(),
         body,
-        error: errJson
-    }, null, 2));
+    };
+
+    console.error(errJson);
 
     return res
         .status(errJson.status)
-        .send(errJson);
+        .send(err.stack || err.message);
 }

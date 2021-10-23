@@ -4,98 +4,70 @@ import * as dockerService from "../services/docker.service";
 
 export default function setDockerRoute(router: Router): Router {
     router.get(routes.docker.image.ls, imageLs);
-    router.post(routes.docker.image.rm, imageRm);
-
     router.get(routes.docker.container.ls, containerLs);
-    router.post(routes.docker.container.start, containerStart);
-    router.post(routes.docker.container.stop, containerStop);
-    router.post(routes.docker.container.rm, containerRm);
-
     router.get(routes.docker.volume.ls, volumeLs);
-    router.post(routes.docker.volume.rm, volumeRm);
-
     router.get(routes.docker.network.ls, networkLs);
-    router.post(routes.docker.network.rm, networkRm);
+
+    router.get(routes.docker.container.start, containerStart);
+    router.get(routes.docker.container.stop, containerStop);
+
+    router.delete(routes.docker.image.rm, imageRm);
+    router.delete(routes.docker.container.rm, containerRm);
+    router.delete(routes.docker.volume.rm, volumeRm);
+    router.delete(routes.docker.network.rm, networkRm);
 
     return router;
 }
 
-async function imageLs(req: Request, res: Response, next: NextFunction) {
-    return dockerService.imageLs(req.params.item)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+function imageLs(req: Request, res: Response, next: NextFunction) {
+    return dockerService.ls.image(req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
-
-async function imageRm(req: Request, res: Response, next: NextFunction) {
-    return dockerService.imageRm(req.body.id)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+function containerLs(_req: Request, res: Response, next: NextFunction) {
+    return dockerService.ls.container().then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
-
-async function containerLs(req: Request, res: Response, next: NextFunction) {
-    return dockerService.containerLs(req.params.item)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+function volumeLs(_req: Request, res: Response, next: NextFunction) {
+    return dockerService.ls.volume().then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
+async function networkLs(_req: Request, res: Response, next: NextFunction) {
+    return dockerService.ls.network().then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
 
 async function containerStart(req: Request, res: Response, next: NextFunction) {
-    return dockerService.containerStart(req.body.id)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+    return dockerService.container("start", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
-
 async function containerStop(req: Request, res: Response, next: NextFunction) {
-    return dockerService.containerStop(req.body.id)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+    return dockerService.container("stop", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
 
+async function imageRm(req: Request, res: Response, next: NextFunction) {
+    return dockerService.rm("image", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
 async function containerRm(req: Request, res: Response, next: NextFunction) {
-    return dockerService.containerRm(req.body.id)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+    return dockerService.rm("container", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
-
-async function volumeLs(req: Request, res: Response, next: NextFunction) {
-    return dockerService.volumeLs(req.params.item)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
-}
-
 async function volumeRm(req: Request, res: Response, next: NextFunction) {
-    return dockerService.volumeRm(req.body.id)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+    return dockerService.rm("volume", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
-
-async function networkLs(req: Request, res: Response, next: NextFunction) {
-    return dockerService.networkLs(req.params.item)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
-}
-
 async function networkRm(req: Request, res: Response, next: NextFunction) {
-    return dockerService.networkRm(req.body.id)
-        .then(result => result
-            ? res.json(result)
-            : res.status(404).end())
-        .catch(e => (e.status = 500, next(e)));
+    return dockerService.rm("network", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
 }
