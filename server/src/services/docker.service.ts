@@ -2,7 +2,7 @@ import { execFile } from "child_process";
 import { Container, Image, Network, Volume } from "../../../shared/interfaces"
 
 type Part = "image" | "container" | "volume" | "network";
-type Cmd = "ls" | "inspect" | "rm" | "start" | "stop";
+type Cmd = "ls" | "inspect" | "logs" | "rm" | "start" | "stop";
 
 export const ls = {
     image(id?: string): Promise<Error | Image[]> {
@@ -88,6 +88,12 @@ export function container(action: "start" | "stop", id: string): Promise<Error |
     return exec("container", action, [id])
         .then(r => asArray(r))
         .then(r => r[0] === id ? id : Promise.reject(r[0] || "response != id"))
+        .catch(asError);
+}
+
+export function logs(id: string): Promise<Error | string[]> {
+    return exec("container", "logs", [id])
+        .then(r => asArray(r))
         .catch(asError);
 }
 

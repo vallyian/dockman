@@ -1,12 +1,15 @@
 <div class="nav">
-    <a href="#" (click)="view = 'images'" [ngClass]="{ 'active': view === 'images' }">Images ({{(images ||
-        []).length}})</a>
-    <a href="#" (click)="view = 'containers'" [ngClass]="{ 'active': view === 'containers' }">Containers ({{(containers
-        || []).length}})</a>
-    <a href="#" (click)="view = 'volumes'" [ngClass]="{ 'active': view === 'volumes' }">Volumes ({{(volumes ||
-        []).length}})</a>
-    <a href="#" (click)="view = 'networks'" [ngClass]="{ 'active': view === 'networks' }">Networks ({{(networks ||
-        []).length}})</a>
+    <span class="left" *ngIf="!(['inspect', 'logs'].includes(view))">
+        <a href="#" (click)="view = 'images'" [ngClass]="{ 'active': view === 'images' }">Images ({{(images ||
+            []).length}})</a>
+        <a href="#" (click)="view = 'containers'" [ngClass]="{ 'active': view === 'containers' }">Containers
+            ({{(containers
+            || []).length}})</a>
+        <a href="#" (click)="view = 'volumes'" [ngClass]="{ 'active': view === 'volumes' }">Volumes ({{(volumes ||
+            []).length}})</a>
+        <a href="#" (click)="view = 'networks'" [ngClass]="{ 'active': view === 'networks' }">Networks ({{(networks ||
+            []).length}})</a>
+    </span>
     <span class="right" *ngIf="selected.length">
         <a href="#" *ngIf="selected.length === 1" (click)="inspect()" title="inspect">
             <svg-icon src="assets/inspect.svg"></svg-icon>
@@ -24,6 +27,10 @@
             title="remove">
             <svg-icon src="assets/x.svg"></svg-icon>
         </a>
+    </span>
+
+    <span class="left" *ngIf="['inspect', 'logs'].includes(view)">
+        <span>{{view}}: {{previousselected}}</span>
     </span>
     <span class="right" *ngIf="['inspect', 'logs'].includes(view)">
         <a href="#" (click)="closeDetails()" title="close">
@@ -118,8 +125,7 @@
             </tr>
         </tbody>
     </table>
-    <div *ngIf="view == 'logs'">
-        xxx
-    </div>
-    <ngx-json-viewer *ngIf="view == 'inspect'" [json]="inspectJson" [expanded]="false"></ngx-json-viewer>
+    <ngx-json-viewer *ngIf="['inspect', 'logs'].includes(view) && containerDetails" [json]="containerDetails"
+        [expanded]="false">
+    </ngx-json-viewer>
 </div>

@@ -23,11 +23,11 @@ export class AppComponent {
         this.ls("*");
     }
 
-    inspectJson?: Object;
+    containerDetails?: Object | string[];
 
     private _view: View = "containers";
     private _previousView?: View;
-    private _previousselected?: string;
+    previousselected?: string;
     get view() { return this._view; }
     set view(view: View) { this._view = view; this.ls(view); }
 
@@ -79,23 +79,26 @@ export class AppComponent {
         })();
         if (!url) return;
         this._previousView = this.view;
-        this._previousselected = this.selected[0];
+        this.previousselected = this.selected[0];
         this.http.get(`${routes.docker.base}${url.replace(":id", encodeURIComponent(this.selected[0]))}`)
-            .subscribe(j => this.inspectJson = j);
+            .subscribe(j => this.containerDetails = j);
         this.view = "inspect";
     }
 
     logs() {
         if (this.view !== 'containers' || this.selected.length !== 1) return;
         this._previousView = this.view;
-        this._previousselected = this.selected[0];
+        this.previousselected = this.selected[0];
+        this.http.get(`${routes.docker.base}${routes.docker.container.logs.replace(":id", encodeURIComponent(this.selected[0]))}`)
+            .subscribe(l => this.containerDetails = l);
         this.view = "logs";
     }
 
     closeDetails() {
         if (!(['inspect', 'logs'].includes(this.view))) return;
         this.view = this._previousView || "containers";
-        if (this._previousselected) this.selected.push(this._previousselected);
+        if (this.previousselected) this.selected.push(this.previousselected);
+        this.containerDetails = undefined;
     }
 
     start() {

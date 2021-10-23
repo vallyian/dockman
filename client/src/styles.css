@@ -23,7 +23,7 @@ body {
     background-color: var(--orange-1);
     border-bottom: var(--padding) solid white;
 }
-    .nav a {
+    .nav > .left > a, .nav > .left > span, .nav > .right > a {
         display: inline-block;
         padding: var(--padding);
         line-height: var(--line-height);
@@ -31,7 +31,7 @@ body {
         color: white;
         font-weight: bold;
     }
-    .nav > a.active {
+    .nav > .left > a.active {
         background-color: var(--orange-2);
     }
     .nav > .right {

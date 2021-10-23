@@ -15,6 +15,7 @@ export default function setDockerRoute(router: Router): Router {
 
     router.get(routes.docker.container.start, containerStart);
     router.get(routes.docker.container.stop, containerStop);
+    router.get(routes.docker.container.logs, containerLogs);
 
     router.delete(routes.docker.image.rm, imageRm);
     router.delete(routes.docker.container.rm, containerRm);
@@ -73,6 +74,11 @@ async function containerStart(req: Request, res: Response, next: NextFunction) {
 }
 async function containerStop(req: Request, res: Response, next: NextFunction) {
     return dockerService.container("stop", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
+async function containerLogs(req: Request, res: Response, next: NextFunction) {
+    return dockerService.logs(req.params.id).then(result => result instanceof Error
         ? next(result)
         : res.json(result));
 }
