@@ -6,7 +6,7 @@ export default Object.freeze({
     /* from process.env - defaults implied */
     NODE_ENV: e("NODE_ENV", "production"),
     CLUSTERS: e("NODE_ENV", "") === "development" ? 1 : os.cpus().length,
-    PORT: +e("PORT", "5555"),
+    PORT: +e("PORT", "80"),
 
     /* other */
 });

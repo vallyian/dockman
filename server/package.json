@@ -19,7 +19,7 @@
     "scripts": {
         "build": "node node_modules/typescript/bin/tsc --project tsconfig.app.json --outDir ./bin",
         "test": "node node_modules/ts-node/dist/bin --project tsconfig.spec.json node_modules/jasmine/bin/jasmine --config=jasmine",
-        "start": "NODE_ENV=development node node_modules/ts-node-dev/lib/bin --project tsconfig.app.json --respawn --transpile-only -- src/index"
+        "start": "NODE_ENV=development PORT=5556 node node_modules/ts-node-dev/lib/bin --project tsconfig.app.json --respawn --transpile-only -- src/index"
     },
     "dependencies": {
         "body-parser": "^1.19.0",

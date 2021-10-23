@@ -18,7 +18,7 @@ It works, but it is neither maintainable nor very reliable, so do not use it in 
 
 ```sh
 (docker stop dockman && docker rm dockman || echo "not running") && \
-docker run --name dockman -v /var/run/docker.sock:/var/run/docker.sock -p 127.0.0.1:5555:5555 --pull always --restart=always -d vallyian/dockman:latest
+docker run --name dockman -v /var/run/docker.sock:/var/run/docker.sock -p 127.0.0.1:5555:80 --pull always --restart=always -d vallyian/dockman:latest
 ```
 
 [http://localhost:5555/](http://localhost:5555/)
