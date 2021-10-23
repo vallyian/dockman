@@ -62,8 +62,8 @@ RUN npm i --production && \
 COPY --from=build-server /app/bin/shared/ /shared/
 COPY --from=build-server /app/bin/app/src/ ./
 COPY --from=build-client /app/dist ./client
-HEALTHCHECK --interval=10s --timeout=1s --start-period=30s --retries=3 \
-    CMD [ $(wget --server-response http://localhost:5555/health 2>&1 | awk '/^  HTTP/{print $2}') = 200 ] || exit 1
+# HEALTHCHECK --interval=60s --timeout=1s --start-period=10s --retries=3 \
+#     CMD [ $(wget --server-response http://localhost:5555/health 2>&1 | awk '/^  HTTP/{print $2}') = 200 ] || exit 1
 VOLUME [ "/var/run/docker.sock" ]
 EXPOSE 80
 ENTRYPOINT [ "node" ]
