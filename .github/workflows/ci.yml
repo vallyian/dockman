@@ -59,12 +59,13 @@ jobs:
             - semver
         env:
             DOCKER_REPO: dockman
+            SEMVER: ${{ needs.semver.outputs.SEMVER }}
 
         steps:
             - uses: actions/checkout@v2
 
             - name: Build
-              run: docker build -t ${DOCKER_REPO} .
+              run: docker build -t ${DOCKER_REPO} --build-arg SEMVER .
 
             - name: Log in to Docker Hub
               uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
@@ -76,7 +77,6 @@ jobs:
             - name: Publish images to Docker Hub
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' }}
               env:
-                SEMVER: ${{ needs.semver.outputs.SEMVER }}
                 DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
               run: |
                 docker tag ${DOCKER_REPO} ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} && \
