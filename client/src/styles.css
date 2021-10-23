@@ -22,6 +22,7 @@ body {
     width: 100%;
     background-color: var(--orange-1);
     border-bottom: var(--padding) solid white;
+    z-index: 99999;
 }
     .nav > .left > a, .nav > .left > span, .nav > .right > a {
         display: inline-block;
