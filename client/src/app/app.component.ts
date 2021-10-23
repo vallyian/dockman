@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { routes } from "../../../shared/routes";
 import { Image, Volume, Container, Network } from "../../../shared/interfaces";
 
-type View = "images" | "containers" | "volumes" | "networks";
+type View = "images" | "containers" | "volumes" | "networks" | "logs" | "inspect";
 
 @Component({
     selector: 'app-root',
@@ -23,7 +23,11 @@ export class AppComponent {
         this.ls("*");
     }
 
+    inspectJson?: Object;
+
     private _view: View = "containers";
+    private _previousView?: View;
+    private _previousselected?: string;
     get view() { return this._view; }
     set view(view: View) { this._view = view; this.ls(view); }
 
@@ -34,6 +38,7 @@ export class AppComponent {
                 case "containers": return this.containers[row]?.ID;
                 case "volumes": return this.volumes[row]?.NAME;
                 case "networks": return this.networks[row]?.ID;
+                default: return undefined;
             }
         })();
         if (!id) return;
@@ -59,6 +64,38 @@ export class AppComponent {
         } else {
             this.selected = this.selected[0] === id ? [] : [id];
         }
+    }
+
+    inspect() {
+        if (this.selected.length !== 1) return;
+        const url = (() => {
+            switch (this.view) {
+                case "images": return routes.docker.image.inspect;
+                case "containers": return routes.docker.container.inspect;
+                case "volumes": return routes.docker.volume.inspect;
+                case "networks": return routes.docker.network.inspect;
+                default: return undefined;
+            }
+        })();
+        if (!url) return;
+        this._previousView = this.view;
+        this._previousselected = this.selected[0];
+        this.http.get(`${routes.docker.base}${url.replace(":id", encodeURIComponent(this.selected[0]))}`)
+            .subscribe(j => this.inspectJson = j);
+        this.view = "inspect";
+    }
+
+    logs() {
+        if (this.view !== 'containers' || this.selected.length !== 1) return;
+        this._previousView = this.view;
+        this._previousselected = this.selected[0];
+        this.view = "logs";
+    }
+
+    closeDetails() {
+        if (!(['inspect', 'logs'].includes(this.view))) return;
+        this.view = this._previousView || "containers";
+        if (this._previousselected) this.selected.push(this._previousselected);
     }
 
     start() {
@@ -138,6 +175,7 @@ export class AppComponent {
                     },
                     () => done(id, "networks")
                 );
+                default: return undefined;
             }
         });
     }

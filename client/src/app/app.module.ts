@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { AngularSvgIconModule } from 'angular-svg-icon';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 @NgModule({
     declarations: [
@@ -11,7 +13,9 @@ import { AppComponent } from './app.component';
     imports: [
         BrowserModule,
         AppRoutingModule,
-        HttpClientModule
+        HttpClientModule,
+        AngularSvgIconModule.forRoot(),
+        NgxJsonViewerModule,
     ],
     providers: [],
     bootstrap: [AppComponent]

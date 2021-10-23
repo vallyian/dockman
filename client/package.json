@@ -31,6 +31,7 @@
         "@angular/platform-browser": "^12.2.11",
         "@angular/platform-browser-dynamic": "^12.2.11",
         "@angular/router": "^12.2.11",
+        "angular-svg-icon": "^12.0.0",
         "ngx-json-viewer": "^3.0.2",
         "rxjs": "~6.6.0",
         "tslib": "^2.3.0",

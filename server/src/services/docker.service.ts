@@ -22,7 +22,7 @@ export const ls = {
                     return 1;
                 return 0;
             }))
-            .catch(err => Error(err.message || JSON.stringify(err)));
+            .catch(asError);
     },
     container(): Promise<Error | Container[]> {
         return lsexec<Container>("container", undefined, ["-a", "--no-trunc"])
@@ -49,7 +49,7 @@ export const ls = {
                     return 1;
                 return 0;
             }))
-            .catch(err => Error(err.message || JSON.stringify(err)));
+            .catch(asError);
     },
     volume(): Promise<Error | Volume[]> {
         return lsexec<Volume>("volume")
@@ -64,7 +64,7 @@ export const ls = {
                     return 1;
                 return 0;
             }))
-            .catch(err => Error(err.message || JSON.stringify(err)));
+            .catch(asError);
     },
     network(): Promise<Error | Network[]> {
         return lsexec<Network>("network", undefined, ["--no-trunc"])
@@ -80,31 +80,32 @@ export const ls = {
                 return 0;
             }))
             .then(n => n.filter(n => n.NAME !== n.DRIVER && n.DRIVER !== "null"))
-            .catch(err => Error(err.message || JSON.stringify(err)));
+            .catch(asError);
     },
 }
 
 export function container(action: "start" | "stop", id: string): Promise<Error | string> {
     return exec("container", action, [id])
-        .then(res => res[0] === id ? id : Promise.reject(res[0] || "response != id"))
-        .catch(err => Error(err.message || JSON.stringify(err)));
+        .then(r => asArray(r))
+        .then(r => r[0] === id ? id : Promise.reject(r[0] || "response != id"))
+        .catch(asError);
 }
 
 export function rm(part: Part, id: string): Promise<Error | string> {
     return exec(part, "rm", [id])
-        .then(res => res.filter(l => l ===`Deleted: ${id}`) ? id : Promise.reject(res[0] || `response != ${id}`))
-        .catch(err => Error(err.message || JSON.stringify(err)));
+        .then(r => asArray(r))
+        .then(r => r.filter(l => l === `Deleted: ${id}`) ? id : Promise.reject(r[0] || `response != ${id}`))
+        .catch(asError);
 }
 
-// function inspect(cmd, id) {
-//     id = id || ls(cmd).map(i => `'${i.ID || i.NAME}'`).join(" ");
-//     const std = JSON.parse(child_process.execSync(`docker ${cmd} inspect ${id}`).toString());
-//     console.log(std);
-//     return std;
-// }
+export function inspect(part: Part, id: string): Promise<Error | Object> {
+    return exec(part, "inspect", [id])
+        .then(r => JSON.parse(r)[0])
+        .catch(asError);
+}
 
 async function lsexec<T>(part: Part, id?: string, flags?: string[]): Promise<T[]> {
-    const std = await exec(part, "ls", id ? [id] : [], flags);
+    const std = await exec(part, "ls", id ? [id] : [], flags).then(r => asArray(r));
     const head = std.shift()!;
     const keys = head.split(/\s{3,}/).reduce(
         (all, key, kx) => {
@@ -135,7 +136,7 @@ function time(val: string) {
         .replace(" years", "y");
 }
 
-function exec(part: Part, cmd: Cmd, id?: string[], flags?: string[]): Promise<string[]> {
+function exec(part: Part, cmd: Cmd, id?: string[], flags?: string[]): Promise<string> {
     const command = ["docker", String(part), String(cmd)]
         .concat(id ? [...id].map(i => String(i)) : [])
         .concat(flags ? [...flags].map(f => String(f)) : []);
@@ -151,5 +152,17 @@ function exec(part: Part, cmd: Cmd, id?: string[], flags?: string[]): Promise<st
             if (stderr) console.error(stderr);
             ok(stdout);
         }
-    )).then(out => out.split("\n").reduce((all, l) => (l = l.trim(), l && all.push(l), all), new Array<string>()));
+    ));
+}
+
+function asArray(input: string): string[] {
+    return input.split("\n").reduce((all, l) => (l = l.trim(), l && all.push(l), all), new Array<string>());
+}
+
+function asJson(input: any) {
+    return JSON.stringify(input);
+}
+
+function asError(e: any) {
+    return Error(e.message || asJson(e));
 }

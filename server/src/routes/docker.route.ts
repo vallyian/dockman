@@ -8,6 +8,11 @@ export default function setDockerRoute(router: Router): Router {
     router.get(routes.docker.volume.ls, volumeLs);
     router.get(routes.docker.network.ls, networkLs);
 
+    router.get(routes.docker.image.inspect, imageInspect);
+    router.get(routes.docker.container.inspect, containerInspect);
+    router.get(routes.docker.volume.inspect, volumeInspect);
+    router.get(routes.docker.network.inspect, networkInspect);
+
     router.get(routes.docker.container.start, containerStart);
     router.get(routes.docker.container.stop, containerStop);
 
@@ -36,6 +41,27 @@ function volumeLs(_req: Request, res: Response, next: NextFunction) {
 }
 async function networkLs(_req: Request, res: Response, next: NextFunction) {
     return dockerService.ls.network().then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
+
+function imageInspect(req: Request, res: Response, next: NextFunction) {
+    return dockerService.inspect("image", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
+function containerInspect(req: Request, res: Response, next: NextFunction) {
+    return dockerService.inspect("container", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
+function volumeInspect(req: Request, res: Response, next: NextFunction) {
+    return dockerService.inspect("volume", req.params.id).then(result => result instanceof Error
+        ? next(result)
+        : res.json(result));
+}
+async function networkInspect(req: Request, res: Response, next: NextFunction) {
+    return dockerService.inspect("network", req.params.id).then(result => result instanceof Error
         ? next(result)
         : res.json(result));
 }

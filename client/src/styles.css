@@ -29,6 +29,7 @@ body {
         line-height: var(--line-height);
         text-decoration: none;
         color: white;
+        font-weight: bold;
     }
     .nav > a.active {
         background-color: var(--orange-2);
@@ -39,8 +40,8 @@ body {
         font-family: monospace;
     }
         .nav > .right > a {
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
         }
 
 .content {

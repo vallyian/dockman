@@ -8,9 +8,27 @@
     <a href="#" (click)="view = 'networks'" [ngClass]="{ 'active': view === 'networks' }">Networks ({{(networks ||
         []).length}})</a>
     <span class="right" *ngIf="selected.length">
-        <a href="#" (click)="start()" *ngIf="view == 'containers'">></a>
-        <a href="#" (click)="stop()" *ngIf="view == 'containers'">||</a>
-        <a href="#" (click)="remove()">x</a>
+        <a href="#" *ngIf="selected.length === 1" (click)="inspect()" title="inspect">
+            <svg-icon src="assets/inspect.svg"></svg-icon>
+        </a>
+        <a href="#" *ngIf="view === 'containers' && selected.length === 1" (click)="logs()" title="logs">
+            <svg-icon src="assets/logs.svg"></svg-icon>
+        </a>
+        <a href="#" *ngIf="view === 'containers'" (click)="start()" title="start">
+            <svg-icon src="assets/start.svg"></svg-icon>
+        </a>
+        <a href="#" *ngIf="view === 'containers'" (click)="stop()" title="stop">
+            <svg-icon src="assets/stop.svg"></svg-icon>
+        </a>
+        <a href="#" *ngIf="['images', 'containers', 'volumes', 'networks'].includes(view)" (click)="remove()"
+            title="remove">
+            <svg-icon src="assets/x.svg"></svg-icon>
+        </a>
+    </span>
+    <span class="right" *ngIf="['inspect', 'logs'].includes(view)">
+        <a href="#" (click)="closeDetails()" title="close">
+            <svg-icon src="assets/x.svg"></svg-icon>
+        </a>
     </span>
 </div>
 
@@ -100,4 +118,8 @@
             </tr>
         </tbody>
     </table>
+    <div *ngIf="view == 'logs'">
+        xxx
+    </div>
+    <ngx-json-viewer *ngIf="view == 'inspect'" [json]="inspectJson" [expanded]="false"></ngx-json-viewer>
 </div>
