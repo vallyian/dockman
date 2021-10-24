@@ -1,7 +1,12 @@
 # dockman
 
-This is a naive proof-of-concept implementation of a web UI using the docker CLI: `UI => API => Docker CLI => Docker API`  
+This is just an experiment, an implementation of a web UI using the docker CLI: `UI => API => Docker CLI => Docker API`  
 It works, but it is neither maintainable nor very reliable, so do not use it in a production env.  
+
+A more solid approach would skip the CLI and use the API directly:  
+[Docker API](https://docs.docker.com/engine/api/v1.41/)  
+[Docker API Example](https://docs.docker.com/engine/api/sdk/examples/)  
+[NodeJs unix socket example](https://stackoverflow.com/questions/41177350/node-js-send-get-request-via-unix-socket)  
 
 ## Prerequisites
 

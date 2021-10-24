@@ -12,7 +12,7 @@ body {
     margin-top: calc(var(--padding) * 2 + var(--line-height));
     padding: 0;
     line-height: var(--line-height);
-    font-family: 'Courier New', Courier, monospace;
+    font-family: sans-serif;
 }
 
 .nav {
@@ -47,7 +47,7 @@ body {
 
 .content {
     padding: var(--padding);
-    /* padding-top: 0; */
+    font-family: 'Courier New', Courier, monospace;
 }
     .content > table > thead > tr.sticky > th {
         position: sticky;
@@ -57,6 +57,7 @@ body {
         z-index: 2;
         padding: .25rem;
         text-align: left;
+        font-family: sans-serif;
     }
         .content > table > thead > tr.sticky > th.check {
             background-color: transparent;
@@ -70,3 +71,17 @@ body {
         .content > table > tbody > tr > td {
             padding: .25rem;
         }
+    .content > table.logs {
+        border-collapse: collapse;
+    }
+    .content > table.logs > tr > td:first-child {
+        white-space: nowrap;
+        font-size: 0.5rem;
+        padding-right: 1rem;
+    }
+    .content > table.logs > tr > td:nth-child(2) {
+        word-break: break-all;
+    }
+    .content > table.logs > tr > td:nth-child(2).red {
+        color: red;
+    }

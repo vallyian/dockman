@@ -15,7 +15,6 @@ export interface Container {
     UP: boolean;
     PORTS: string[];
     NAMES: string;
-    SIZE: string;
 }
 
 export interface Volume {
@@ -28,4 +27,10 @@ export interface Network {
     NAME: string;
     DRIVER: string;
     SCOPE: string;
+}
+
+export interface Log {
+    dt: Date;
+    log: string;
+    err?: boolean;
 }

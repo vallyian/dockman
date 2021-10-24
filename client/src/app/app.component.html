@@ -1,13 +1,13 @@
 <div class="nav">
     <span class="left" *ngIf="!(['inspect', 'logs'].includes(view))">
-        <a href="#" (click)="view = 'images'" [ngClass]="{ 'active': view === 'images' }">Images ({{(images ||
+        <a href="#" (click)="view = 'images'" [ngClass]="{ active: view === 'images' }">Images ({{(images ||
             []).length}})</a>
-        <a href="#" (click)="view = 'containers'" [ngClass]="{ 'active': view === 'containers' }">Containers
+        <a href="#" (click)="view = 'containers'" [ngClass]="{ active: view === 'containers' }">Containers
             ({{(containers
             || []).length}})</a>
-        <a href="#" (click)="view = 'volumes'" [ngClass]="{ 'active': view === 'volumes' }">Volumes ({{(volumes ||
+        <a href="#" (click)="view = 'volumes'" [ngClass]="{ active: view === 'volumes' }">Volumes ({{(volumes ||
             []).length}})</a>
-        <a href="#" (click)="view = 'networks'" [ngClass]="{ 'active': view === 'networks' }">Networks ({{(networks ||
+        <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(networks ||
             []).length}})</a>
     </span>
     <span class="right" *ngIf="selected.length">
@@ -40,6 +40,7 @@
 </div>
 
 <div class="content">
+
     <table *ngIf="view == 'images'" cellspacing="0" cellpadding="0">
         <thead>
             <tr class="sticky">
@@ -61,6 +62,7 @@
             </tr>
         </tbody>
     </table>
+
     <table *ngIf="view == 'containers'" cellspacing="0" cellpadding="0">
         <thead>
             <tr class="sticky">
@@ -70,7 +72,6 @@
                 <th>PORTS</th>
                 <!-- <th>COMMAND</th> -->
                 <th>STATUS</th>
-                <th>SIZE</th>
                 <th>CREATED</th>
             </tr>
         </thead>
@@ -86,11 +87,11 @@
                         target="_blank">{{port}}</a></td>
                 <!-- <td>{{container.COMMAND}}</td> -->
                 <td>{{container.STATUS}}</td>
-                <td>{{container.SIZE}}</td>
                 <td>{{container.CREATED}}</td>
             </tr>
         </tbody>
     </table>
+
     <table *ngIf="view == 'volumes'" cellspacing="0" cellpadding="0">
         <thead>
             <tr class="sticky">
@@ -106,6 +107,7 @@
             </tr>
         </tbody>
     </table>
+
     <table *ngIf="view == 'networks'" cellspacing="0" cellpadding="0">
         <thead>
             <tr class="sticky">
@@ -125,7 +127,16 @@
             </tr>
         </tbody>
     </table>
-    <ngx-json-viewer *ngIf="['inspect', 'logs'].includes(view) && containerDetails" [json]="containerDetails"
-        [expanded]="false">
+
+    <ngx-json-viewer *ngIf="view === 'inspect' && inspectJson" [json]="inspectJson" [expanded]="false">
     </ngx-json-viewer>
+
+    <table *ngIf="view === 'logs' && logs" class="logs">
+        <tr *ngFor="let entry of logsArr">
+            <td>{{entry.dt}}</td>
+            <td [ngClass]="{ red: entry.err }">{{entry.log.replaceAll(" ", "&#160;")}}</td>
+        </tr>
+        <tr><td colspan="2" id="logend"></td></tr>
+    </table>
+
 </div>

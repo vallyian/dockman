@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { routes } from "../../../shared/routes";
-import { Image, Volume, Container, Network } from "../../../shared/interfaces";
+import { Image, Volume, Container, Network, Log } from "../../../shared/interfaces";
 
 type View = "images" | "containers" | "volumes" | "networks" | "logs" | "inspect";
 
@@ -16,20 +16,20 @@ export class AppComponent {
     volumes = new Array<Volume>();
     networks = new Array<Network>();
     selected = new Array<string>();
+    previousselected?: string;
+    inspectJson?: Object;
+    logsArr?: Log[];
+
+    private _view: View = "containers";
+    private _previousView?: View;
+    get view() { return this._view; }
+    set view(view: View) { this._view = view; this.ls(view); }
 
     constructor(
         private http: HttpClient
     ) {
         this.ls("*");
     }
-
-    containerDetails?: Object | string[];
-
-    private _view: View = "containers";
-    private _previousView?: View;
-    previousselected?: string;
-    get view() { return this._view; }
-    set view(view: View) { this._view = view; this.ls(view); }
 
     select(row: number, event: MouseEvent) {
         const id = (() => {
@@ -81,24 +81,39 @@ export class AppComponent {
         this._previousView = this.view;
         this.previousselected = this.selected[0];
         this.http.get(`${routes.docker.base}${url.replace(":id", encodeURIComponent(this.selected[0]))}`)
-            .subscribe(j => this.containerDetails = j);
+            .subscribe(j => this.inspectJson = j);
         this.view = "inspect";
+    }
+
+    async wait<T>(cond: () => T | Promise<T>, timeout: number, interval = 100): Promise<T | null | undefined> {
+        let result: any;
+        do {
+            timeout -= interval;
+            result = await Promise.resolve().then(() => cond());
+        } while ((result === null || result === undefined) && timeout > 0);
+        return result;
     }
 
     logs() {
         if (this.view !== 'containers' || this.selected.length !== 1) return;
         this._previousView = this.view;
         this.previousselected = this.selected[0];
-        this.http.get(`${routes.docker.base}${routes.docker.container.logs.replace(":id", encodeURIComponent(this.selected[0]))}`)
-            .subscribe(l => this.containerDetails = l);
-        this.view = "logs";
+        this.http.get<Log[]>(`${routes.docker.base}${routes.docker.container.logs.replace(":id", encodeURIComponent(this.selected[0]))}`).subscribe(logs => {
+            this.view = "logs";
+            this.logsArr = logs;
+            setTimeout(async () => {
+                const elem = await this.wait(() => document.getElementById("logend"), 3000);
+                if (elem) setTimeout(() => elem.scrollIntoView({ behavior: "smooth", block: "start" }));
+            });
+        });
     }
 
     closeDetails() {
         if (!(['inspect', 'logs'].includes(this.view))) return;
         this.view = this._previousView || "containers";
         if (this.previousselected) this.selected.push(this.previousselected);
-        this.containerDetails = undefined;
+        this.inspectJson = undefined;
+        this.logsArr = undefined;
     }
 
     start() {

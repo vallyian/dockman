@@ -1,5 +1,5 @@
 import { execFile } from "child_process";
-import { Container, Image, Network, Volume } from "../../../shared/interfaces"
+import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces"
 
 type Part = "image" | "container" | "volume" | "network";
 type Cmd = "ls" | "inspect" | "logs" | "rm" | "start" | "stop";
@@ -91,9 +91,35 @@ export function container(action: "start" | "stop", id: string): Promise<Error |
         .catch(asError);
 }
 
-export function logs(id: string): Promise<Error | string[]> {
-    return exec("container", "logs", [id])
+export function logs(id: string): Promise<Error | Log[]> {
+    return exec("container", "logs", [id], ["-t", "--tail", 1000])
         .then(r => asArray(r))
+        .then(r => {
+            const logsArr = new Array<Log>();
+            let err = false;
+            r.forEach(log => {
+                switch (log) {
+                    case "<ERROR>": err = true; break;
+                    case "</ERROR>": err = false; break;
+                    default:
+                        const entry = <Log>{
+                            dt: <any>(log.substring(0, 30)),
+                            log: log.substring(31, Infinity),
+                            err: !!err
+                        };
+                        if (entry.log.trim()) logsArr.push(entry);
+                        break;
+                }
+            });
+            return logsArr;
+        })
+        .then(i => i.sort((a, b) => {
+            if (a.dt < b.dt)
+                return -1;
+            if (a.dt > b.dt)
+                return 1;
+            return 0;
+        }))
         .catch(asError);
 }
 
@@ -142,27 +168,28 @@ function time(val: string) {
         .replace(" years", "y");
 }
 
-function exec(part: Part, cmd: Cmd, id?: string[], flags?: string[]): Promise<string> {
+function exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number>): Promise<string> {
     const command = ["docker", String(part), String(cmd)]
-        .concat(id ? [...id].map(i => String(i)) : [])
-        .concat(flags ? [...flags].map(f => String(f)) : []);
+        .concat(flags ? [...flags].map(f => String(f)) : [])
+        .concat(id ? [...id].map(i => String(i)) : []);
 
-    console.log(command);
+    console.log("=>", command.join(" "));
 
-    return new Promise<string>((ok, rej) => execFile(
-        <string>command.shift(),
-        command,
-        { timeout: 60 * 1000, shell: false },
-        (error, stdout, stderr) => {
-            if (error) rej(error);
-            if (stderr) console.error(stderr);
-            ok(stdout);
-        }
-    ));
+    return new Promise((ok, rej) => {
+        let log = "";
+        const execLogs = execFile(
+            <string>command.shift(),
+            command,
+            { timeout: 60 * 1000, shell: false },
+            error => error ? rej(error) : ok(log)
+        );
+        execLogs.stdout?.on('data', data => log += <string>data);
+        execLogs.stderr?.on('data', data => log += "\n<ERROR>\n" + <string>data + "\n</ERROR>\n");
+    });
 }
 
 function asArray(input: string): string[] {
-    return input.split("\n").reduce((all, l) => (l = l.trim(), l && all.push(l), all), new Array<string>());
+    return input.split("\n").reduce((all, l) => (l.trim() && all.push(l), all), new Array<string>());
 }
 
 function asJson(input: any) {
