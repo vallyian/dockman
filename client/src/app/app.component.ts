@@ -32,29 +32,42 @@ export class AppComponent {
     }
 
     select(row: number, event: MouseEvent) {
-        const id = (() => {
+        const getId = (ix: number) => {
             switch (this.view) {
-                case "images": return this.images[row]?.ID;
-                case "containers": return this.containers[row]?.ID;
-                case "volumes": return this.volumes[row]?.NAME;
-                case "networks": return this.networks[row]?.ID;
+                case "images": return this.images[ix]?.ID;
+                case "containers": return this.containers[ix]?.ID;
+                case "volumes": return this.volumes[ix]?.NAME;
+                case "networks": return this.networks[ix]?.ID;
                 default: return undefined;
             }
-        })();
+        };
+        const id = getId(row);
         if (!id) return;
         if (event.shiftKey) {
             document.getSelection()?.empty();
-            // const first = this.selected[0];
-            // if (!first) {
-            //     this.selected.push(id);
-            // } else if (first === id) {
-            //     this.selected = [];
-            // } else {
-            //     while (first !== id) {
-            //         this.selected.push(id);
-            //         row += first < id ? -1 : 1;
-            //     }
-            // }
+            const first = this.selected[0];
+            if (!first) {
+                this.selected.push(id);
+            } else if (first === id) {
+                this.selected = [];
+            } else {
+                const getIx = (id: string) => {
+                    switch (this.view) {
+                        case "images": return this.images.findIndex(i => i.ID === id);
+                        case "containers": return this.containers.findIndex(c => c.ID === id);
+                        case "volumes": return this.volumes.findIndex(v => v.NAME === id);
+                        case "networks": return this.networks.findIndex(n => n.ID === id);
+                        default: return undefined;
+                    }
+                };
+                let lastRow = getIx(this.selected[this.selected.length - 1])!;
+                while (row !== lastRow) {
+                    lastRow += row < lastRow ? -1 : 1;
+                    const newId = getId(lastRow);
+                    if (!newId || this.selected.includes(newId)) continue;
+                    this.selected.push(newId);
+                }
+            }
         } else if (event.ctrlKey) {
             document.getSelection()?.empty();
             const index = this.selected.indexOf(id);
@@ -83,15 +96,6 @@ export class AppComponent {
         this.http.get(`${routes.docker.base}${url.replace(":id", encodeURIComponent(this.selected[0]))}`)
             .subscribe(j => this.inspectJson = j);
         this.view = "inspect";
-    }
-
-    async wait<T>(cond: () => T | Promise<T>, timeout: number, interval = 100): Promise<T | null | undefined> {
-        let result: any;
-        do {
-            timeout -= interval;
-            result = await Promise.resolve().then(() => cond());
-        } while ((result === null || result === undefined) && timeout > 0);
-        return result;
     }
 
     logs() {
@@ -212,5 +216,14 @@ export class AppComponent {
         if (view === "networks" || view === "*")
             this.http.get<Network[]>(`${routes.docker.base}${routes.docker.network.ls}`)
                 .subscribe(networks => this.networks = networks);
+    }
+
+    private async wait<T>(cond: () => T | Promise<T>, timeout: number, interval = 100): Promise<T | null | undefined> {
+        let result: any;
+        do {
+            timeout -= interval;
+            result = await Promise.resolve().then(() => cond());
+        } while ((result === null || result === undefined) && timeout > 0);
+        return result;
     }
 }

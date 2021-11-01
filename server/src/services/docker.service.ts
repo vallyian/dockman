@@ -12,13 +12,21 @@ export const ls = {
                 return i;
             }))
             .then(i => i.sort((a, b) => {
-                if (a.REPOSITORY < b.REPOSITORY)
+                let { REPOSITORY: ar, TAG: at } = a;
+                let { REPOSITORY: br, TAG: bt } = b;
+                if (ar === "<none>") ar = "~";
+                if (br === "<none>") br = "~";
+                if (at === "<none>") at = "~";
+                if (bt === "<none>") bt = "~";
+                ar = ar.toUpperCase();
+                br = br.toUpperCase();
+                if (ar < br)
                     return -1;
-                if (a.REPOSITORY > b.REPOSITORY)
+                if (ar > br)
                     return 1;
-                if (a.TAG < b.TAG)
+                if (at < bt)
                     return -1;
-                if (a.TAG > b.TAG)
+                if (at > bt)
                     return 1;
                 return 0;
             }))
@@ -124,7 +132,9 @@ export function logs(id: string): Promise<Error | Log[]> {
 }
 
 export function rm(part: Part, id: string): Promise<Error | string> {
-    return exec(part, "rm", [id])
+    const flags = new Array<string | number>();
+    if (part === "image") flags.push("-f");
+    return exec(part, "rm", [id], flags)
         .then(r => asArray(r))
         .then(r => r.filter(l => l === `Deleted: ${id}`) ? id : Promise.reject(r[0] || `response != ${id}`))
         .catch(asError);

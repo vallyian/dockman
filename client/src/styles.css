@@ -62,7 +62,7 @@ body {
         .content > table > thead > tr.sticky > th.check {
             background-color: transparent;
         }
-    .content > table > tbody > tr.stop {
+    .content > table > tbody > tr.inactive {
         color: var(--grey-1);
     }
     .content > table > tbody > tr.select {
