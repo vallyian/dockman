@@ -26,22 +26,22 @@ export default function setDockerRoute(router: Router): Router {
 }
 
 function imageLs(req: Request, res: Response, next: NextFunction) {
-    return dockerService.ls.image(req.params.id).then(result => result instanceof Error
+    return dockerService.imageLs(req.params.id).then(result => result instanceof Error
         ? next(result)
         : res.json(result));
 }
 function containerLs(_req: Request, res: Response, next: NextFunction) {
-    return dockerService.ls.container().then(result => result instanceof Error
+    return dockerService.containerLs().then(result => result instanceof Error
         ? next(result)
         : res.json(result));
 }
 function volumeLs(_req: Request, res: Response, next: NextFunction) {
-    return dockerService.ls.volume().then(result => result instanceof Error
+    return dockerService.volumeLs().then(result => result instanceof Error
         ? next(result)
         : res.json(result));
 }
 async function networkLs(_req: Request, res: Response, next: NextFunction) {
-    return dockerService.ls.network().then(result => result instanceof Error
+    return dockerService.networkLs().then(result => result instanceof Error
         ? next(result)
         : res.json(result));
 }

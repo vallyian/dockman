@@ -52,7 +52,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let image of images; let row = index;" [ngClass]="{ 
+            <tr *ngFor="let image of images; let row = index;" [ngClass]="{
                 inactive: image.REPOSITORY === '<none>' && image.TAG === '<none>',
                 select: selected.includes(image.ID)
             }"
@@ -86,7 +86,7 @@
                 <!-- <td>{{container.ID}}</td> -->
                 <td>{{container.IMAGE}}</td>
                 <td>{{container.NAMES}}</td>
-                <td><a *ngFor="let port of container.PORTS" [href]="'//localhost:' + port.split(':')[0]"
+                <td><a *ngFor="let port of container.PORTS" [href]="(port.startsWith('443:') ? 'https:' : '') + '//localhost:' + port.split(':')[0]"
                         target="_blank">{{port}}</a></td>
                 <!-- <td>{{container.COMMAND}}</td> -->
                 <td>{{container.STATUS}}</td>

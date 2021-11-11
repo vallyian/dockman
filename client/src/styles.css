@@ -5,6 +5,7 @@
     --orange-2: #ff9c55;
     --orange-3: #fad5ba;
     --grey-1: #b3b3b3;
+    --link: blue;
 }
 
 body {
@@ -71,6 +72,16 @@ body {
         .content > table > tbody > tr > td {
             padding: .25rem;
         }
+            .content > table > tbody > tr > td > a {
+                color: var(--link);
+                text-decoration: none;
+            }
+            .content > table > tbody > tr > td > a:active {
+                color: var(--link);
+            }
+            .content > table > tbody > tr > td > a:visited {
+                color: var(--link);
+            }
     .content > table.logs {
         border-collapse: collapse;
     }

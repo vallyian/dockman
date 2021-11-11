@@ -4,92 +4,94 @@ import { Container, Image, Log, Network, Volume } from "../../../shared/interfac
 type Part = "image" | "container" | "volume" | "network";
 type Cmd = "ls" | "inspect" | "logs" | "rm" | "start" | "stop";
 
-export const ls = {
-    image(id?: string): Promise<Error | Image[]> {
-        return lsexec<Image>("image", id, ["--no-trunc"])
-            .then(i => i.map(i => {
-                i.CREATED = time(i.CREATED);
-                return i;
-            }))
-            .then(i => i.sort((a, b) => {
-                let { REPOSITORY: ar, TAG: at } = a;
-                let { REPOSITORY: br, TAG: bt } = b;
-                if (ar === "<none>") ar = "~";
-                if (br === "<none>") br = "~";
-                if (at === "<none>") at = "~";
-                if (bt === "<none>") bt = "~";
-                ar = ar.toUpperCase();
-                br = br.toUpperCase();
-                if (ar < br)
-                    return -1;
-                if (ar > br)
-                    return 1;
-                if (at < bt)
-                    return -1;
-                if (at > bt)
-                    return 1;
-                return 0;
-            }))
-            .catch(asError);
-    },
-    container(): Promise<Error | Container[]> {
-        return lsexec<Container>("container", undefined, ["-a", "--no-trunc"])
-            .then(c => c.map(c => {
-                c.PORTS = (<string><any>c.PORTS).split(",")
-                    .reduce((ps, p) => {
-                        p = ((p.match(/\d+\.\d+\.\d+\.\d+\:(\d+\-\>\d+)\/tcp/) || [])[1] || "").replace("->", ":");
-                        if (p) ps.push(p);
-                        return ps;
-                    }, new Array<string>());
-                c.UP = /^Up /i.test(c.STATUS);
-                c.STATUS = time(c.STATUS.replace(/(Up\s+|Exited \(\d+\)\s+)/, ""));
-                c.CREATED = time(c.CREATED);
-                return c;
-            }))
-            .then(c => c.sort((a, b) => {
-                if (a.NAMES < b.NAMES)
-                    return -1;
-                if (a.NAMES > b.NAMES)
-                    return 1;
-                if (a.IMAGE < b.IMAGE)
-                    return -1;
-                if (a.IMAGE > b.IMAGE)
-                    return 1;
-                return 0;
-            }))
-            .catch(asError);
-    },
-    volume(): Promise<Error | Volume[]> {
-        return lsexec<Volume>("volume")
-            .then(i => i.sort((a, b) => {
-                if (a.NAME < b.NAME)
-                    return -1;
-                if (a.NAME > b.NAME)
-                    return 1;
-                if (a.DRIVER < b.DRIVER)
-                    return -1;
-                if (a.DRIVER > b.DRIVER)
-                    return 1;
-                return 0;
-            }))
-            .catch(asError);
-    },
-    network(): Promise<Error | Network[]> {
-        return lsexec<Network>("network", undefined, ["--no-trunc"])
-            .then(n => n.sort((a, b) => {
-                if (a.NAME < b.NAME)
-                    return -1;
-                if (a.NAME > b.NAME)
-                    return 1;
-                if (a.DRIVER < b.DRIVER)
-                    return -1;
-                if (a.DRIVER > b.DRIVER)
-                    return 1;
-                return 0;
-            }))
-            .then(n => n.filter(n => n.NAME !== n.DRIVER && n.DRIVER !== "null"))
-            .catch(asError);
-    },
+export function imageLs(id?: string): Promise<Error | Image[]> {
+    return lsexec<Image>("image", id, ["--no-trunc"])
+        .then(i => i.map(i => {
+            i.CREATED = time(i.CREATED);
+            return i;
+        }))
+        .then(i => i.sort((a, b) => {
+            let { REPOSITORY: ar, TAG: at } = a;
+            let { REPOSITORY: br, TAG: bt } = b;
+            if (ar === "<none>") ar = "~";
+            if (br === "<none>") br = "~";
+            if (at === "<none>") at = "~";
+            if (bt === "<none>") bt = "~";
+            ar = ar.toUpperCase();
+            br = br.toUpperCase();
+            if (ar < br)
+                return -1;
+            if (ar > br)
+                return 1;
+            if (at < bt)
+                return -1;
+            if (at > bt)
+                return 1;
+            return 0;
+        }))
+        .catch(asError);
+}
+
+export function containerLs(): Promise<Error | Container[]> {
+    return lsexec<Container>("container", undefined, ["-a", "--no-trunc"])
+        .then(c => c.map(c => {
+            c.PORTS = (<string><any>c.PORTS).split(",")
+                .reduce((ps, p) => {
+                    const display = ((p.match(/\d+\.\d+\.\d+\.\d+\:(\d+\-\>\d+)\/tcp/) || [])[1] || "").replace("->", ":");
+                    if (display)
+                        ps.push(display + (p.startsWith("127.0.0.1:") ? " (local)" : ""));
+                    return ps;
+                }, new Array<string>());
+            c.UP = /^Up /i.test(c.STATUS);
+            c.STATUS = time(c.STATUS.replace(/(Up\s+|Exited \(\d+\)\s+)/, ""));
+            c.CREATED = time(c.CREATED);
+            return c;
+        }))
+        .then(c => c.sort((a, b) => {
+            if (a.NAMES < b.NAMES)
+                return -1;
+            if (a.NAMES > b.NAMES)
+                return 1;
+            if (a.IMAGE < b.IMAGE)
+                return -1;
+            if (a.IMAGE > b.IMAGE)
+                return 1;
+            return 0;
+        }))
+        .catch(asError);
+}
+
+export function volumeLs(): Promise<Error | Volume[]> {
+    return lsexec<Volume>("volume")
+        .then(i => i.sort((a, b) => {
+            if (a.NAME < b.NAME)
+                return -1;
+            if (a.NAME > b.NAME)
+                return 1;
+            if (a.DRIVER < b.DRIVER)
+                return -1;
+            if (a.DRIVER > b.DRIVER)
+                return 1;
+            return 0;
+        }))
+        .catch(asError);
+}
+
+export function networkLs(): Promise<Error | Network[]> {
+    return lsexec<Network>("network", undefined, ["--no-trunc"])
+        .then(n => n.sort((a, b) => {
+            if (a.NAME < b.NAME)
+                return -1;
+            if (a.NAME > b.NAME)
+                return 1;
+            if (a.DRIVER < b.DRIVER)
+                return -1;
+            if (a.DRIVER > b.DRIVER)
+                return 1;
+            return 0;
+        }))
+        .then(n => n.filter(n => n.NAME !== n.DRIVER && n.DRIVER !== "null"))
+        .catch(asError);
 }
 
 export function container(action: "start" | "stop", id: string): Promise<Error | string> {
@@ -187,14 +189,14 @@ function exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number
 
     return new Promise((ok, rej) => {
         let log = "";
-        const execLogs = execFile(
+        const child = execFile(
             <string>command.shift(),
             command,
             { timeout: 60 * 1000, shell: false },
             error => error ? rej(error) : ok(log)
         );
-        execLogs.stdout?.on('data', data => log += <string>data);
-        execLogs.stderr?.on('data', data => log += "\n<ERROR>\n" + <string>data + "\n</ERROR>\n");
+        child.stdout?.on('data', data => log += <string>data);
+        child.stderr?.on('data', data => log += "\n<ERROR>\n" + <string>data + "\n</ERROR>\n");
     });
 }
 
