@@ -33,7 +33,7 @@ export function imageLs(id?: string): Promise<Error | Image[]> {
 }
 
 export function containerLs(): Promise<Error | Container[]> {
-    return lsexec<Container>("container", undefined, ["-a", "--no-trunc"])
+    return lsexec<Container>("container", undefined, ["-a", "--no-trunc", "--size"])
         .then(c => c.map(c => {
             c.PORTS = (<string><any>c.PORTS).split(",")
                 .reduce((ps, p) => {
@@ -45,6 +45,7 @@ export function containerLs(): Promise<Error | Container[]> {
             c.UP = /^Up /i.test(c.STATUS);
             c.STATUS = time(c.STATUS.replace(/(Up\s+|Exited \(\d+\)\s+)/, ""));
             c.CREATED = time(c.CREATED);
+            c.SIZE = c.SIZE.replace("virtual ", "");
             return c;
         }))
         .then(c => c.sort((a, b) => {

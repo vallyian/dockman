@@ -15,6 +15,7 @@ export interface Container {
     UP: boolean;
     PORTS: string[];
     NAMES: string;
+    SIZE: string;
 }
 
 export interface Volume {

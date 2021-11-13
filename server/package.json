@@ -14,7 +14,8 @@
         "url": "https://github.com/vallyian/dockman.git"
     },
     "engines": {
-        "node": ">=14 <15"
+        "node": ">=16 <17",
+        "npm": ">=8 <9"
     },
     "scripts": {
         "build": "node node_modules/typescript/bin/tsc --project tsconfig.app.json --outDir ./bin",

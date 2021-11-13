@@ -73,6 +73,7 @@
                 <th>IMAGE</th>
                 <th>NAME</th>
                 <th>PORTS</th>
+                <th>SIZE</th>
                 <!-- <th>COMMAND</th> -->
                 <th>STATUS</th>
                 <th>CREATED</th>
@@ -88,6 +89,7 @@
                 <td>{{container.NAMES}}</td>
                 <td><a *ngFor="let port of container.PORTS" [href]="(port.startsWith('443:') ? 'https:' : '') + '//localhost:' + port.split(':')[0]"
                         target="_blank">{{port}}</a></td>
+                <td>{{container.SIZE}}</td>
                 <!-- <td>{{container.COMMAND}}</td> -->
                 <td>{{container.STATUS}}</td>
                 <td>{{container.CREATED}}</td>

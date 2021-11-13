@@ -17,11 +17,22 @@ If you need a "real" app for this, there are plenty (some open source) solutions
 
 ## Build
 
-* `docker build -t vallyian/dockman:latest .`
+```sh
+docker buildx build -t vallyian/dockman:local .
+```
 
 ## Run
 
 **Security warning**: Docker daemon has root access, so do NOT expose this outside `127.0.0.1` !!!
+
+* local image
+
+```sh
+(docker stop dockman-local && docker rm dockman-local || echo "not running") && \
+docker run --rm --name dockman-local -v /var/run/docker.sock:/var/run/docker.sock -p 127.0.0.1:5556:80 vallyian/dockman:local
+```
+
+* public image
 
 ```sh
 (docker stop dockman && docker rm dockman || echo "not running") && \
