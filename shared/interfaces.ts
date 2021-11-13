@@ -21,6 +21,7 @@ export interface Container {
 export interface Volume {
     DRIVER: string;
     NAME: string;
+    SIZE: string;
 }
 
 export interface Network {

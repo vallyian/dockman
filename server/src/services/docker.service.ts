@@ -5,8 +5,8 @@ type Part = "image" | "container" | "volume" | "network";
 type Cmd = "ls" | "inspect" | "logs" | "rm" | "start" | "stop";
 
 export function imageLs(id?: string): Promise<Error | Image[]> {
-    return lsexec<Image>("image", id, ["--no-trunc"])
-        .then(i => i.map(i => {
+    return ls_exec<Image>("image", id, ["--no-trunc"])
+        .then(is => is.map(i => {
             i.CREATED = time(i.CREATED);
             return i;
         }))
@@ -33,8 +33,8 @@ export function imageLs(id?: string): Promise<Error | Image[]> {
 }
 
 export function containerLs(): Promise<Error | Container[]> {
-    return lsexec<Container>("container", undefined, ["-a", "--no-trunc", "--size"])
-        .then(c => c.map(c => {
+    return ls_exec<Container>("container", undefined, ["-a", "--no-trunc", "--size"])
+        .then(cs => cs.map(c => {
             c.PORTS = (<string><any>c.PORTS).split(",")
                 .reduce((ps, p) => {
                     const display = ((p.match(/\d+\.\d+\.\d+\.\d+\:(\d+\-\>\d+)\/tcp/) || [])[1] || "").replace("->", ":");
@@ -63,8 +63,9 @@ export function containerLs(): Promise<Error | Container[]> {
 }
 
 export function volumeLs(): Promise<Error | Volume[]> {
-    return lsexec<Volume>("volume")
-        .then(i => i.sort((a, b) => {
+    return ls_exec<Volume>("volume")
+        .then(v => du_exec(v))
+        .then(v => v.sort((a, b) => {
             if (a.NAME < b.NAME)
                 return -1;
             if (a.NAME > b.NAME)
@@ -79,7 +80,7 @@ export function volumeLs(): Promise<Error | Volume[]> {
 }
 
 export function networkLs(): Promise<Error | Network[]> {
-    return lsexec<Network>("network", undefined, ["--no-trunc"])
+    return ls_exec<Network>("network", undefined, ["--no-trunc"])
         .then(n => n.sort((a, b) => {
             if (a.NAME < b.NAME)
                 return -1;
@@ -96,14 +97,14 @@ export function networkLs(): Promise<Error | Network[]> {
 }
 
 export function container(action: "start" | "stop", id: string): Promise<Error | string> {
-    return exec("container", action, [id])
+    return docker_exec("container", action, [id])
         .then(r => asArray(r))
         .then(r => r[0] === id ? id : Promise.reject(r[0] || "response != id"))
         .catch(asError);
 }
 
 export function logs(id: string): Promise<Error | Log[]> {
-    return exec("container", "logs", [id], ["-t", "--tail", 1000])
+    return docker_exec("container", "logs", [id], ["-t", "--tail", 1000])
         .then(r => asArray(r))
         .then(r => {
             const logsArr = new Array<Log>();
@@ -137,20 +138,20 @@ export function logs(id: string): Promise<Error | Log[]> {
 export function rm(part: Part, id: string): Promise<Error | string> {
     const flags = new Array<string | number>();
     if (part === "image") flags.push("-f");
-    return exec(part, "rm", [id], flags)
+    return docker_exec(part, "rm", [id], flags)
         .then(r => asArray(r))
         .then(r => r.filter(l => l === `Deleted: ${id}`) ? id : Promise.reject(r[0] || `response != ${id}`))
         .catch(asError);
 }
 
 export function inspect(part: Part, id: string): Promise<Error | Object> {
-    return exec(part, "inspect", [id])
+    return docker_exec(part, "inspect", [id])
         .then(r => JSON.parse(r)[0])
         .catch(asError);
 }
 
-async function lsexec<T>(part: Part, id?: string, flags?: string[]): Promise<T[]> {
-    const std = await exec(part, "ls", id ? [id] : [], flags).then(r => asArray(r));
+async function ls_exec<T>(part: Part, id?: string, flags?: string[]): Promise<T[]> {
+    const std = await docker_exec(part, "ls", id ? [id] : [], flags).then(r => asArray(r));
     const head = std.shift()!;
     const keys = head.split(/\s{3,}/).reduce(
         (all, key, kx) => {
@@ -181,11 +182,22 @@ function time(val: string) {
         .replace(" years", "y");
 }
 
-function exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number>): Promise<string> {
-    const command = ["docker", String(part), String(cmd)]
-        .concat(flags ? [...flags].map(f => String(f)) : [])
-        .concat(id ? [...id].map(i => String(i)) : []);
+async function du_exec(volumes: Volume[]) {
+    return exec(["du", "-hs", ...volumes.map(v => `/var/lib/docker/volumes/${v.NAME}/_data`)])
+        .then(r => asArray(r))
+        .then(r => r.map(line => line.split(/\s+/)))
+        .then(sizes => volumes.map(v => ({ ...v, SIZE: (sizes.find(s => s[1] === `/var/lib/docker/volumes/${v.NAME}/_data`) || [])[0] || "-" })));
+}
 
+function docker_exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number>): Promise<string> {
+    return exec(
+        ["docker", String(part), String(cmd)]
+            .concat(flags ? [...flags].map(f => String(f)) : [])
+            .concat(id ? [...id].map(i => String(i)) : [])
+    );
+}
+
+function exec(command: string[]): Promise<string> {
     console.log("=>", command.join(" "));
 
     return new Promise((ok, rej) => {
