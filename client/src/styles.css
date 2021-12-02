@@ -47,13 +47,16 @@ body {
         }
 
 .content {
-    padding: var(--padding);
+    --thead-top: calc(var(--padding) * 3 + var(--line-height));
+    --thead-height: calc(var(--padding) + var(--line-height));
     font-family: 'Courier New', Courier, monospace;
+    padding: var(--padding);
+    height: calc(100vh - var(--thead-top) - var(--thead-height));
 }
     .content > table > thead > tr.sticky > th {
         position: sticky;
-        top: calc(var(--padding) * 3 + var(--line-height));
-        height: calc(var(--padding) + var(--line-height));
+        top: var(--thead-top);
+        height: var(--thead-height);
         background-color: var(--orange-2);
         z-index: 2;
         padding: .25rem;

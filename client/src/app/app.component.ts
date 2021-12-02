@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { routes } from "../../../shared/routes";
 import { Image, Volume, Container, Network, Log } from "../../../shared/interfaces";
@@ -77,6 +77,11 @@ export class AppComponent {
         } else {
             this.selected = this.selected[0] === id ? [] : [id];
         }
+    }
+
+    unselect(event: MouseEvent) {
+        if (!event || !event.target || !(<HTMLElement>event.target).classList.contains("content")) return;
+        this.selected = [];
     }
 
     inspect() {
