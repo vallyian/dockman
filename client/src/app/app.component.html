@@ -6,11 +6,11 @@
         <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(data.networks || []).length}})</a>
         <input type="text" placeholder="filter" id="filter" autofocus [(ngModel)]="filter.value" (ngModelChange)="updateFileter()">
     </span>
-    <span class="right" *ngIf="selected.length">
-        <a href="#" *ngIf="selected.length === 1" (click)="inspect()" title="inspect">
+    <span class="right" *ngIf="selected.items.length">
+        <a href="#" *ngIf="selected.items.length === 1" (click)="inspect()" title="inspect">
             <svg-icon src="assets/inspect.svg"></svg-icon>
         </a>
-        <a href="#" *ngIf="view === 'containers' && selected.length === 1" (click)="logs()" title="logs">
+        <a href="#" *ngIf="view === 'containers' && selected.items.length === 1" (click)="logs()" title="logs">
             <svg-icon src="assets/logs.svg"></svg-icon>
         </a>
         <a href="#" *ngIf="view === 'containers'" (click)="start()" title="start">
@@ -26,7 +26,7 @@
     </span>
 
     <span class="left" *ngIf="['inspect', 'logs'].includes(view)">
-        <span>{{view}}: {{previousselected}}</span>
+        <span>{{view}}: {{selected.previous}}</span>
     </span>
     <span class="right" *ngIf="['inspect', 'logs'].includes(view)">
         <a href="#" (click)="closeDetails()" title="close">
@@ -50,7 +50,7 @@
         <tbody>
             <tr *ngFor="let image of data.images; let row = index;" [ngClass]="{
                 inactive: image.REPOSITORY === '<none>' && image.TAG === '<none>',
-                select: selected.includes(image.ID)
+                select: selected.items.includes(image.ID)
             }"
                 (click)="select(row, $event)">
                 <!-- <td>{{image.ID}}</td> -->
@@ -78,7 +78,7 @@
         <tbody>
             <tr *ngFor="let container of data.containers; let row = index;" [ngClass]="{
                     inactive: !container.UP,
-                    select: selected.includes(container.ID)
+                    select: selected.items.includes(container.ID)
                  }" (click)="select(row, $event)">
                 <!-- <td>{{container.ID}}</td> -->
                 <td>{{container.IMAGE}}</td>
@@ -102,7 +102,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let volume of data.volumes; let row = index;" [ngClass]="{ select: selected.includes(volume.NAME) }"
+            <tr *ngFor="let volume of data.volumes; let row = index;" [ngClass]="{ select: selected.items.includes(volume.NAME) }"
                 (click)="select(row, $event)">
                 <td>{{volume.NAME}}</td>
                 <td>{{volume.DRIVER}}</td>
@@ -121,7 +121,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let network of data.networks; let row = index;" [ngClass]="{ select: selected.includes(network.ID) }"
+            <tr *ngFor="let network of data.networks; let row = index;" [ngClass]="{ select: selected.items.includes(network.ID) }"
                 (click)="select(row, $event)">
                 <!-- <td>{{network.ID}}</td> -->
                 <td>{{network.NAME}}</td>
@@ -131,11 +131,11 @@
         </tbody>
     </table>
 
-    <ngx-json-viewer *ngIf="view === 'inspect' && inspectJson" [json]="inspectJson" [expanded]="false">
+    <ngx-json-viewer *ngIf="view === 'inspect' && data.inspect" [json]="data.inspect" [expanded]="false">
     </ngx-json-viewer>
 
-    <table *ngIf="view === 'logs' && logs" class="logs">
-        <tr *ngFor="let entry of logsArr">
+    <table *ngIf="view === 'logs' && data.logs" class="logs">
+        <tr *ngFor="let entry of data.logs">
             <td>{{entry.dt}}</td>
             <td [ngClass]="{ red: entry.err }">{{entry.log.replaceAll(" ", "&#160;")}}</td>
         </tr>

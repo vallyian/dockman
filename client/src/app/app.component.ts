@@ -16,33 +16,37 @@ export class AppComponent implements AfterViewInit {
         containers: new Array<Container>(),
         volumes: new Array<Volume>(),
         networks: new Array<Network>(),
+        inspect: <Object | undefined>undefined,
+        logs: <Log[] | undefined>undefined
     };
-    selected = new Array<string>();
-    previousselected?: string;
-    inspectJson?: Object;
-    logsArr?: Log[];
-    filter = {
+    readonly selected = {
+        items: new Array<string>(),
+        previous: <string | null>null
+    };
+    readonly filter = {
         value: "",
         elem: <HTMLInputElement | null>null
     };
 
+    get view() { return this.viewData.current; }
+    set view(view: View) {
+        this.viewData.current = view;
+        this.ls(view);
+        this.filter.elem?.focus()
+    }
+
     @ViewChildren('filterField') filterField: any;
 
-    private _view: View = "containers";
-    private _previousView?: View;
+    private readonly viewData = {
+        current: <View>"containers",
+        previous: <View | undefined>undefined
+    };
     private readonly _data = {
         images: new Array<Image>(),
         containers: new Array<Container>(),
         volumes: new Array<Volume>(),
         networks: new Array<Network>()
     };
-
-    get view() { return this._view; }
-    set view(view: View) {
-        this._view = view;
-        this.ls(view);
-        this.filter.elem?.focus()
-    }
 
     constructor(
         private http: HttpClient
@@ -56,8 +60,8 @@ export class AppComponent implements AfterViewInit {
 
     @HostListener("document:visibilitychange")
     refresh() {
-        if (document.hidden || !this._view) return;
-        this.ls(this._view);
+        if (document.hidden || !this.viewData.current) return;
+        this.ls(this.viewData.current);
     }
 
     select(row: number, event: MouseEvent) {
@@ -74,11 +78,11 @@ export class AppComponent implements AfterViewInit {
         if (!id) return;
         if (event.shiftKey) {
             document.getSelection()?.empty();
-            const first = this.selected[0];
+            const first = this.selected.items[0];
             if (!first) {
-                this.selected.push(id);
+                this.selected.items.push(id);
             } else if (first === id) {
-                this.selected = [];
+                this.selected.items = [];
             } else {
                 const getIx = (id: string) => {
                     switch (this.view) {
@@ -89,32 +93,32 @@ export class AppComponent implements AfterViewInit {
                         default: return undefined;
                     }
                 };
-                let lastRow = getIx(this.selected[this.selected.length - 1])!;
+                let lastRow = getIx(this.selected.items[this.selected.items.length - 1])!;
                 while (row !== lastRow) {
                     lastRow += row < lastRow ? -1 : 1;
                     const newId = getId(lastRow);
-                    if (!newId || this.selected.includes(newId)) continue;
-                    this.selected.push(newId);
+                    if (!newId || this.selected.items.includes(newId)) continue;
+                    this.selected.items.push(newId);
                 }
             }
         } else if (event.ctrlKey) {
             document.getSelection()?.empty();
-            const index = this.selected.indexOf(id);
+            const index = this.selected.items.indexOf(id);
             index >= 0
-                ? this.selected.splice(index, 1)
-                : this.selected.push(id);
+                ? this.selected.items.splice(index, 1)
+                : this.selected.items.push(id);
         } else {
-            this.selected = this.selected[0] === id ? [] : [id];
+            this.selected.items = this.selected.items[0] === id ? [] : [id];
         }
     }
 
     unselect(event: MouseEvent) {
         if (!event || !event.target || !(<HTMLElement>event.target).classList.contains("content")) return;
-        this.selected = [];
+        this.selected.items = [];
     }
 
     inspect() {
-        if (this.selected.length !== 1) return;
+        if (this.selected.items.length !== 1) return;
         const url = (() => {
             switch (this.view) {
                 case "images": return routes.docker.image.inspect;
@@ -125,20 +129,20 @@ export class AppComponent implements AfterViewInit {
             }
         })();
         if (!url) return;
-        this._previousView = this.view;
-        this.previousselected = this.selected[0];
-        this.http.get(`${routes.docker.base}${url.replace(":id", encodeURIComponent(this.selected[0]))}`)
-            .subscribe(j => this.inspectJson = j);
+        this.viewData.previous = this.view;
+        this.selected.previous = this.selected.items[0];
+        this.http.get(`${routes.docker.base}${url.replace(":id", encodeURIComponent(this.selected.items[0]))}`)
+            .subscribe(j => this.data.inspect = j);
         this.view = "inspect";
     }
 
     logs() {
-        if (this.view !== 'containers' || this.selected.length !== 1) return;
-        this._previousView = this.view;
-        this.previousselected = this.selected[0];
-        this.http.get<Log[]>(`${routes.docker.base}${routes.docker.container.logs.replace(":id", encodeURIComponent(this.selected[0]))}`).subscribe(logs => {
+        if (this.view !== 'containers' || this.selected.items.length !== 1) return;
+        this.viewData.previous = this.view;
+        this.selected.previous = this.selected.items[0];
+        this.http.get<Log[]>(`${routes.docker.base}${routes.docker.container.logs.replace(":id", encodeURIComponent(this.selected.items[0]))}`).subscribe(logs => {
             this.view = "logs";
-            this.logsArr = logs;
+            this.data.logs = logs;
             setTimeout(async () => {
                 const elem = await this.wait(() => document.getElementById("logend"), 3000);
                 if (elem) setTimeout(() => elem.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -148,22 +152,22 @@ export class AppComponent implements AfterViewInit {
 
     closeDetails() {
         if (!(['inspect', 'logs'].includes(this.view))) return;
-        this.view = this._previousView || "containers";
-        if (this.previousselected) this.selected.push(this.previousselected);
-        this.inspectJson = undefined;
-        this.logsArr = undefined;
+        this.view = this.viewData.previous || "containers";
+        if (this.selected.previous) this.selected.items.push(this.selected.previous);
+        this.data.inspect = undefined;
+        this.data.logs = undefined;
     }
 
     start() {
-        if (this.view !== "containers" || this.selected.length === 0)
+        if (this.view !== "containers" || this.selected.items.length === 0)
             return;
-        let count = this.selected.length;
+        let count = this.selected.items.length;
         const done = (id: string) => {
-            this.selected = this.selected.filter(s => s !== id);
+            this.selected.items = this.selected.items.filter(s => s !== id);
             count--;
             if (!count) this.ls("containers");
         };
-        [...this.selected].forEach(id =>
+        [...this.selected.items].forEach(id =>
             this.http.get(`${routes.docker.base}${routes.docker.container.start}`.replace(":id", encodeURIComponent(id))).subscribe(
                 () => done(id),
                 () => done(id)
@@ -172,15 +176,15 @@ export class AppComponent implements AfterViewInit {
     }
 
     stop() {
-        if (this.view !== "containers" || this.selected.length === 0)
+        if (this.view !== "containers" || this.selected.items.length === 0)
             return;
-        let count = this.selected.length;
+        let count = this.selected.items.length;
         const done = (id: string) => {
-            this.selected = this.selected.filter(s => s !== id);
+            this.selected.items = this.selected.items.filter(s => s !== id);
             count--;
             if (!count) this.ls("containers");
         };
-        [...this.selected].forEach(id =>
+        [...this.selected.items].forEach(id =>
             this.http.get(`${routes.docker.base}${routes.docker.container.stop}`.replace(":id", encodeURIComponent(id))).subscribe(
                 () => done(id),
                 () => done(id)
@@ -189,19 +193,19 @@ export class AppComponent implements AfterViewInit {
     }
 
     remove() {
-        if (this.selected.length === 0)
+        if (this.selected.items.length === 0)
             return;
-        let count = this.selected.length;
+        let count = this.selected.items.length;
         const done = (id: string, view: View) => {
-            this.selected = this.selected.filter(s => s !== id);
+            this.selected.items = this.selected.items.filter(s => s !== id);
             count--;
             if (!count) this.ls(view);
         };
-        this.selected.forEach(id => {
+        this.selected.items.forEach(id => {
             switch (this.view) {
                 case "images": return this.http.delete(`${routes.docker.base}${routes.docker.image.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
-                        this.selected = this.selected.filter(s => s !== id);
+                        this.selected.items = this.selected.items.filter(s => s !== id);
                         this._data.images = this._data.images.filter(i => i.ID !== id);
                         done(id, "images");
                     },
@@ -209,7 +213,7 @@ export class AppComponent implements AfterViewInit {
                 );
                 case "containers": return this.http.delete(`${routes.docker.base}${routes.docker.container.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
-                        this.selected = this.selected.filter(s => s !== id);
+                        this.selected.items = this.selected.items.filter(s => s !== id);
                         this._data.containers = this._data.containers.filter(c => c.ID !== id);
                         done(id, "containers");
                     },
@@ -217,7 +221,7 @@ export class AppComponent implements AfterViewInit {
                 );
                 case "volumes": return this.http.delete(`${routes.docker.base}${routes.docker.volume.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
-                        this.selected = this.selected.filter(s => s !== id);
+                        this.selected.items = this.selected.items.filter(s => s !== id);
                         this._data.volumes = this._data.volumes.filter(v => v.NAME !== id);
                         done(id, "volumes");
                     },
@@ -225,7 +229,7 @@ export class AppComponent implements AfterViewInit {
                 );
                 case "networks": return this.http.delete(`${routes.docker.base}${routes.docker.network.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
-                        this.selected = this.selected.filter(s => s !== id);
+                        this.selected.items = this.selected.items.filter(s => s !== id);
                         this._data.networks = this._data.networks.filter(n => n.ID !== id);
                         done(id, "networks");
                     },
@@ -248,7 +252,7 @@ export class AppComponent implements AfterViewInit {
     }
 
     private ls(view: View | "*") {
-        this.selected = [];
+        this.selected.items = [];
         if (view === "images" || view === "*")
             this.http.get<Image[]>(`${routes.docker.base}${routes.docker.image.ls}`)
                 .subscribe(images => (this._data.images = images, this.data.images = <Image[]>this.lsFilter(images)));
