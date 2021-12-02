@@ -8,12 +8,12 @@ A more solid approach would skip the CLI and use the API directly:
 [Docker API Example](https://docs.docker.com/engine/api/sdk/examples/)  
 [NodeJs unix socket example](https://stackoverflow.com/questions/41177350/node-js-send-get-request-via-unix-socket)  
 
-If you need a "real" app for this, there are plenty (some open source) solutions out there, just search for "docker web UI" or similar.
+If you need a "prod ready" app for this, there are plenty (some open source) solutions out there, just search for "docker web UI" or similar.
 
 ## Prerequisites
 
-* [Docker](https://docs.docker.com/get-docker/)
-* [Node.js v14 LTS](https://nodejs.org/en/) - only for development
+* [Docker / Linux (e.g. Ubuntu)](https://docs.docker.com/engine/install/ubuntu/)
+* [Node.js LTS](https://nodejs.org/en/) - only for development
 
 ## Build
 
