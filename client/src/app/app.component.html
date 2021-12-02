@@ -131,7 +131,7 @@
         </tbody>
     </table>
 
-    <ngx-json-viewer *ngIf="view === 'inspect' && data.inspect" [json]="data.inspect" [expanded]="false">
+    <ngx-json-viewer *ngIf="view === 'inspect' && data.inspect" [json]="data.inspect" [expanded]="false" class="inspect">
     </ngx-json-viewer>
 
     <table *ngIf="view === 'logs' && data.logs" class="logs">
