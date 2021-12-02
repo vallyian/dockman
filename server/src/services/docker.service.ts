@@ -186,7 +186,8 @@ async function du_exec(volumes: Volume[]) {
     return exec(["du", "-hs", ...volumes.map(v => `/var/lib/docker/volumes/${v.NAME}/_data`)])
         .then(r => asArray(r))
         .then(r => r.map(line => line.split(/\s+/)))
-        .then(sizes => volumes.map(v => ({ ...v, SIZE: (sizes.find(s => s[1] === `/var/lib/docker/volumes/${v.NAME}/_data`) || [])[0] || "-" })));
+        .then(sizes => volumes.map(v => ({ ...v, SIZE: (sizes.find(s => s[1] === `/var/lib/docker/volumes/${v.NAME}/_data`) || [])[0] || "-" })))
+        .catch(err => (console.error(err), volumes.map(v => ({ ...v, SIZE: "-" }))));
 }
 
 function docker_exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number>): Promise<string> {
