@@ -11,14 +11,12 @@ type View = "images" | "containers" | "volumes" | "networks" | "logs" | "inspect
     styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-    images = new Array<Image>();
-    containers = new Array<Container>();
-    volumes = new Array<Volume>();
-    networks = new Array<Network>();
-    imagesFiltered = new Array<Image>();
-    containersFiltered = new Array<Container>();
-    volumesFiltered = new Array<Volume>();
-    networksFiltered = new Array<Network>();
+    readonly data = {
+        images: new Array<Image>(),
+        containers: new Array<Container>(),
+        volumes: new Array<Volume>(),
+        networks: new Array<Network>(),
+    };
     selected = new Array<string>();
     previousselected?: string;
     inspectJson?: Object;
@@ -32,6 +30,13 @@ export class AppComponent implements AfterViewInit {
 
     private _view: View = "containers";
     private _previousView?: View;
+    private readonly _data = {
+        images: new Array<Image>(),
+        containers: new Array<Container>(),
+        volumes: new Array<Volume>(),
+        networks: new Array<Network>()
+    };
+
     get view() { return this._view; }
     set view(view: View) {
         this._view = view;
@@ -58,10 +63,10 @@ export class AppComponent implements AfterViewInit {
     select(row: number, event: MouseEvent) {
         const getId = (ix: number) => {
             switch (this.view) {
-                case "images": return this.images[ix]?.ID;
-                case "containers": return this.containers[ix]?.ID;
-                case "volumes": return this.volumes[ix]?.NAME;
-                case "networks": return this.networks[ix]?.ID;
+                case "images": return this.data.images[ix]?.ID;
+                case "containers": return this.data.containers[ix]?.ID;
+                case "volumes": return this.data.volumes[ix]?.NAME;
+                case "networks": return this.data.networks[ix]?.ID;
                 default: return undefined;
             }
         };
@@ -77,10 +82,10 @@ export class AppComponent implements AfterViewInit {
             } else {
                 const getIx = (id: string) => {
                     switch (this.view) {
-                        case "images": return this.images.findIndex(i => i.ID === id);
-                        case "containers": return this.containers.findIndex(c => c.ID === id);
-                        case "volumes": return this.volumes.findIndex(v => v.NAME === id);
-                        case "networks": return this.networks.findIndex(n => n.ID === id);
+                        case "images": return this.data.images.findIndex(i => i.ID === id);
+                        case "containers": return this.data.containers.findIndex(c => c.ID === id);
+                        case "volumes": return this.data.volumes.findIndex(v => v.NAME === id);
+                        case "networks": return this.data.networks.findIndex(n => n.ID === id);
                         default: return undefined;
                     }
                 };
@@ -197,7 +202,7 @@ export class AppComponent implements AfterViewInit {
                 case "images": return this.http.delete(`${routes.docker.base}${routes.docker.image.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
                         this.selected = this.selected.filter(s => s !== id);
-                        this.images = this.images.filter(i => i.ID !== id);
+                        this._data.images = this._data.images.filter(i => i.ID !== id);
                         done(id, "images");
                     },
                     () => done(id, "images")
@@ -205,7 +210,7 @@ export class AppComponent implements AfterViewInit {
                 case "containers": return this.http.delete(`${routes.docker.base}${routes.docker.container.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
                         this.selected = this.selected.filter(s => s !== id);
-                        this.containers = this.containers.filter(c => c.ID !== id);
+                        this._data.containers = this._data.containers.filter(c => c.ID !== id);
                         done(id, "containers");
                     },
                     () => done(id, "containers")
@@ -213,7 +218,7 @@ export class AppComponent implements AfterViewInit {
                 case "volumes": return this.http.delete(`${routes.docker.base}${routes.docker.volume.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
                         this.selected = this.selected.filter(s => s !== id);
-                        this.volumes = this.volumes.filter(v => v.NAME !== id);
+                        this._data.volumes = this._data.volumes.filter(v => v.NAME !== id);
                         done(id, "volumes");
                     },
                     () => done(id, "volumes")
@@ -221,7 +226,7 @@ export class AppComponent implements AfterViewInit {
                 case "networks": return this.http.delete(`${routes.docker.base}${routes.docker.network.rm}`.replace(":id", encodeURIComponent(id))).subscribe(
                     () => {
                         this.selected = this.selected.filter(s => s !== id);
-                        this.networks = this.networks.filter(n => n.ID !== id);
+                        this._data.networks = this._data.networks.filter(n => n.ID !== id);
                         done(id, "networks");
                     },
                     () => done(id, "networks")
@@ -233,29 +238,29 @@ export class AppComponent implements AfterViewInit {
 
     updateFileter() {
         if (this.view === "images")
-            this.imagesFiltered = <Image[]>this.lsFilter(this.images);
+            this.data.images = <Image[]>this.lsFilter(this._data.images);
         if (this.view === "containers")
-            this.containersFiltered = <Container[]>this.lsFilter(this.containers);
+            this.data.containers = <Container[]>this.lsFilter(this._data.containers);
         if (this.view === "volumes")
-            this.volumesFiltered = <Volume[]>this.lsFilter(this.volumes);
+            this.data.volumes = <Volume[]>this.lsFilter(this._data.volumes);
         if (this.view === "networks")
-            this.networksFiltered = <Network[]>this.lsFilter(this.networks);
+            this.data.networks = <Network[]>this.lsFilter(this._data.networks);
     }
 
     private ls(view: View | "*") {
         this.selected = [];
         if (view === "images" || view === "*")
             this.http.get<Image[]>(`${routes.docker.base}${routes.docker.image.ls}`)
-                .subscribe(images => (this.images = images, this.imagesFiltered = <Image[]>this.lsFilter(images)));
+                .subscribe(images => (this._data.images = images, this.data.images = <Image[]>this.lsFilter(images)));
         if (view === "containers" || view === "*")
             this.http.get<Container[]>(`${routes.docker.base}${routes.docker.container.ls}`)
-                .subscribe(containers => (this.containers = containers, this.containersFiltered = <Container[]>this.lsFilter(containers)));
+                .subscribe(containers => (this._data.containers = containers, this.data.containers = <Container[]>this.lsFilter(containers)));
         if (view === "volumes" || view === "*")
             this.http.get<Volume[]>(`${routes.docker.base}${routes.docker.volume.ls}`)
-                .subscribe(volumes => (this.volumes = volumes, this.volumesFiltered = <Volume[]>this.lsFilter(volumes)));
+                .subscribe(volumes => (this._data.volumes = volumes, this.data.volumes = <Volume[]>this.lsFilter(volumes)));
         if (view === "networks" || view === "*")
             this.http.get<Network[]>(`${routes.docker.base}${routes.docker.network.ls}`)
-                .subscribe(networks => (this.networks = networks, this.networksFiltered = <Network[]>this.lsFilter(networks)));
+                .subscribe(networks => (this._data.networks = networks, this.data.networks = <Network[]>this.lsFilter(networks)));
     }
 
     private lsFilter(items: Array<Image | Container | Volume | Network>) {

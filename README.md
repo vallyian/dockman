@@ -26,8 +26,8 @@ docker buildx build -t vallyian/dockman:local .
 **Security warning**: Docker daemon has root access, so do NOT expose this outside `127.0.0.1` !!!
 
 * local folders
-  * `cd ./server && ([ -d node_modules ] || npm i) && npm start`
   * `cd ./client && ([ -d node_modules ] || npm i) && npm start`
+  * `cd ./server && ([ -d node_modules ] || npm i) && npm start`
 
 * local image
 

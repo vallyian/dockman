@@ -1,14 +1,9 @@
 <div class="nav">
     <span class="left" *ngIf="!(['inspect', 'logs'].includes(view))">
-        <a href="#" (click)="view = 'images'" [ngClass]="{ active: view === 'images' }">Images ({{(images ||
-            []).length}})</a>
-        <a href="#" (click)="view = 'containers'" [ngClass]="{ active: view === 'containers' }">Containers
-            ({{(containers
-            || []).length}})</a>
-        <a href="#" (click)="view = 'volumes'" [ngClass]="{ active: view === 'volumes' }">Volumes ({{(volumes ||
-            []).length}})</a>
-        <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(networks ||
-            []).length}})</a>
+        <a href="#" (click)="view = 'images'" [ngClass]="{ active: view === 'images' }">Images ({{(data.images || []).length}})</a>
+        <a href="#" (click)="view = 'containers'" [ngClass]="{ active: view === 'containers' }">Containers ({{(data.containers || []).length}})</a>
+        <a href="#" (click)="view = 'volumes'" [ngClass]="{ active: view === 'volumes' }">Volumes ({{(data.volumes || []).length}})</a>
+        <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(data.networks || []).length}})</a>
         <input type="text" placeholder="filter" id="filter" autofocus [(ngModel)]="filter.value" (ngModelChange)="updateFileter()">
     </span>
     <span class="right" *ngIf="selected.length">
@@ -53,7 +48,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let image of imagesFiltered; let row = index;" [ngClass]="{
+            <tr *ngFor="let image of data.images; let row = index;" [ngClass]="{
                 inactive: image.REPOSITORY === '<none>' && image.TAG === '<none>',
                 select: selected.includes(image.ID)
             }"
@@ -81,7 +76,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let container of containersFiltered; let row = index;" [ngClass]="{
+            <tr *ngFor="let container of data.containers; let row = index;" [ngClass]="{
                     inactive: !container.UP,
                     select: selected.includes(container.ID)
                  }" (click)="select(row, $event)">
@@ -107,7 +102,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let volume of volumesFiltered; let row = index;" [ngClass]="{ select: selected.includes(volume.NAME) }"
+            <tr *ngFor="let volume of data.volumes; let row = index;" [ngClass]="{ select: selected.includes(volume.NAME) }"
                 (click)="select(row, $event)">
                 <td>{{volume.NAME}}</td>
                 <td>{{volume.DRIVER}}</td>
@@ -126,7 +121,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let network of networksFiltered; let row = index;" [ngClass]="{ select: selected.includes(network.ID) }"
+            <tr *ngFor="let network of data.networks; let row = index;" [ngClass]="{ select: selected.includes(network.ID) }"
                 (click)="select(row, $event)">
                 <!-- <td>{{network.ID}}</td> -->
                 <td>{{network.NAME}}</td>
