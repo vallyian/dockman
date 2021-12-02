@@ -41,6 +41,7 @@ body {
         outline: 0;
         font-size: 1rem;
         width: 8rem;
+        margin-left: var(--padding);
     }
 
     .nav > .right {

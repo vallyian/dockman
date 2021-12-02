@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, HostListener, ViewChildren } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { routes } from "../../../shared/routes";
 import { Image, Volume, Container, Network, Log } from "../../../shared/interfaces";
@@ -47,6 +47,12 @@ export class AppComponent implements AfterViewInit {
 
     ngAfterViewInit() {
         this.filter.elem = document.getElementById("filter") as HTMLInputElement;
+    }
+
+    @HostListener("document:visibilitychange")
+    refresh() {
+        if (document.hidden || !this._view) return;
+        this.ls(this._view);
     }
 
     select(row: number, event: MouseEvent) {
