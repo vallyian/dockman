@@ -9,6 +9,7 @@
             []).length}})</a>
         <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(networks ||
             []).length}})</a>
+        <input type="text" placeholder="filter" id="filter" autofocus [(ngModel)]="filter.value" (ngModelChange)="updateFileter()">
     </span>
     <span class="right" *ngIf="selected.length">
         <a href="#" *ngIf="selected.length === 1" (click)="inspect()" title="inspect">
@@ -52,7 +53,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let image of images; let row = index;" [ngClass]="{
+            <tr *ngFor="let image of imagesFiltered; let row = index;" [ngClass]="{
                 inactive: image.REPOSITORY === '<none>' && image.TAG === '<none>',
                 select: selected.includes(image.ID)
             }"
@@ -80,7 +81,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let container of containers; let row = index;" [ngClass]="{
+            <tr *ngFor="let container of containersFiltered; let row = index;" [ngClass]="{
                     inactive: !container.UP,
                     select: selected.includes(container.ID)
                  }" (click)="select(row, $event)">
@@ -106,7 +107,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let volume of volumes; let row = index;" [ngClass]="{ select: selected.includes(volume.NAME) }"
+            <tr *ngFor="let volume of volumesFiltered; let row = index;" [ngClass]="{ select: selected.includes(volume.NAME) }"
                 (click)="select(row, $event)">
                 <td>{{volume.NAME}}</td>
                 <td>{{volume.DRIVER}}</td>
@@ -125,7 +126,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let network of networks; let row = index;" [ngClass]="{ select: selected.includes(network.ID) }"
+            <tr *ngFor="let network of networksFiltered; let row = index;" [ngClass]="{ select: selected.includes(network.ID) }"
                 (click)="select(row, $event)">
                 <!-- <td>{{network.ID}}</td> -->
                 <td>{{network.NAME}}</td>

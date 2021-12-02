@@ -36,6 +36,13 @@ body {
     .nav > .left > a.active {
         background-color: var(--orange-2);
     }
+    .nav > .left > input {
+        border: 0;
+        outline: 0;
+        font-size: 1rem;
+        width: 8rem;
+    }
+
     .nav > .right {
         float: right;
         padding-right: var(--padding);

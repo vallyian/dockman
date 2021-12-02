@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ViewChildren } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { routes } from "../../../shared/routes";
 import { Image, Volume, Container, Network, Log } from "../../../shared/interfaces";
@@ -10,25 +10,43 @@ type View = "images" | "containers" | "volumes" | "networks" | "logs" | "inspect
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
     images = new Array<Image>();
     containers = new Array<Container>();
     volumes = new Array<Volume>();
     networks = new Array<Network>();
+    imagesFiltered = new Array<Image>();
+    containersFiltered = new Array<Container>();
+    volumesFiltered = new Array<Volume>();
+    networksFiltered = new Array<Network>();
     selected = new Array<string>();
     previousselected?: string;
     inspectJson?: Object;
     logsArr?: Log[];
+    filter = {
+        value: "",
+        elem: <HTMLInputElement | null>null
+    };
+
+    @ViewChildren('filterField') filterField: any;
 
     private _view: View = "containers";
     private _previousView?: View;
     get view() { return this._view; }
-    set view(view: View) { this._view = view; this.ls(view); }
+    set view(view: View) {
+        this._view = view;
+        this.ls(view);
+        this.filter.elem?.focus()
+    }
 
     constructor(
         private http: HttpClient
     ) {
         this.ls("*");
+    }
+
+    ngAfterViewInit() {
+        this.filter.elem = document.getElementById("filter") as HTMLInputElement;
     }
 
     select(row: number, event: MouseEvent) {
@@ -207,20 +225,37 @@ export class AppComponent {
         });
     }
 
+    updateFileter() {
+        if (this.view === "images")
+            this.imagesFiltered = <Image[]>this.lsFilter(this.images);
+        if (this.view === "containers")
+            this.containersFiltered = <Container[]>this.lsFilter(this.containers);
+        if (this.view === "volumes")
+            this.volumesFiltered = <Volume[]>this.lsFilter(this.volumes);
+        if (this.view === "networks")
+            this.networksFiltered = <Network[]>this.lsFilter(this.networks);
+    }
+
     private ls(view: View | "*") {
         this.selected = [];
         if (view === "images" || view === "*")
             this.http.get<Image[]>(`${routes.docker.base}${routes.docker.image.ls}`)
-                .subscribe(images => this.images = images);
+                .subscribe(images => (this.images = images, this.imagesFiltered = <Image[]>this.lsFilter(images)));
         if (view === "containers" || view === "*")
             this.http.get<Container[]>(`${routes.docker.base}${routes.docker.container.ls}`)
-                .subscribe(containers => this.containers = containers);
+                .subscribe(containers => (this.containers = containers, this.containersFiltered = <Container[]>this.lsFilter(containers)));
         if (view === "volumes" || view === "*")
             this.http.get<Volume[]>(`${routes.docker.base}${routes.docker.volume.ls}`)
-                .subscribe(volumes => this.volumes = volumes);
+                .subscribe(volumes => (this.volumes = volumes, this.volumesFiltered = <Volume[]>this.lsFilter(volumes)));
         if (view === "networks" || view === "*")
             this.http.get<Network[]>(`${routes.docker.base}${routes.docker.network.ls}`)
-                .subscribe(networks => this.networks = networks);
+                .subscribe(networks => (this.networks = networks, this.networksFiltered = <Network[]>this.lsFilter(networks)));
+    }
+
+    private lsFilter(items: Array<Image | Container | Volume | Network>) {
+        return !this.filter.value
+            ? items
+            : items.filter(i => Object.values(i).find(v => String(v).includes(this.filter.value)));
     }
 
     private async wait<T>(cond: () => T | Promise<T>, timeout: number, interval = 100): Promise<T | null | undefined> {
