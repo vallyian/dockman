@@ -17,7 +17,7 @@ jobs:
         name: Semantic version
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # v3.0.2
 
             - name: Github env
               id: github_env
@@ -28,7 +28,7 @@ jobs:
 
             - name: Tag version
               id: tag_version
-              uses: mathieudutour/github-tag-action@v5.5
+              uses: mathieudutour/github-tag-action@d745f2e74aaf1ee82e747b181f7a0967978abee0 # v6.0
               with:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 dry_run: ${{ steps.github_env.outputs.GITHUB_MAIN != 'true' }}
@@ -62,13 +62,13 @@ jobs:
             SEMVER: ${{ needs.semver.outputs.SEMVER }}
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # v3.0.2
 
             - name: Build
               run: docker build -t ${DOCKER_REPO} --build-arg SEMVER .
 
             - name: Log in to Docker Hub
-              uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+              uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # 1.14.1
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' }}
               with:
                 username: ${{ secrets.DOCKER_USERNAME }}
