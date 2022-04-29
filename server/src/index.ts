@@ -1,4 +1,4 @@
-import * as cluster from "cluster";
+import * as _cluster from "cluster"; const cluster = <_cluster.Cluster><unknown>_cluster;
 import * as os from "os";
 import { Application } from "express";
 import env from "./env";
@@ -10,7 +10,7 @@ enum ExitCode {
     Generic = 1,
     UncaughtException = 2,
     UnhandledRejection = 3,
-    /* master */
+    /* primary */
     Environment = 101,
     InitFunction = 102,
     /* workers */
@@ -28,7 +28,7 @@ async function serve(expressAppFactory: () => Application | Promise<Application>
         process.exit(ExitCode.UnhandledRejection);
     });
 
-    await (cluster.isMaster
+    await (cluster.isPrimary
         ? clusterMain()
         : clusterWorker(expressAppFactory)
     ).catch(err => {

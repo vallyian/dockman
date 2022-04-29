@@ -1,6 +1,9 @@
+.angular
 .vscode
-!.vscode/extensions.json
 **/bin
 **/dist
 **/node_modules
 **/test-results
+
+!.vscode/extensions.json
+!.vscode/launch.json

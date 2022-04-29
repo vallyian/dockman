@@ -12,8 +12,8 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 
 ## Prerequisites
 
-* [Docker / Linux (e.g. Ubuntu)](https://docs.docker.com/engine/install/ubuntu/)
-* [Node.js LTS](https://nodejs.org/en/) - only for development
+* [Docker Engine for Linux / Docker Desktop with WSL integration](https://docs.docker.com/engine/install/ubuntu/)
+* [Node.js LTS](https://nodejs.org/en/) [*only for development*]
 
 ## Build
 
@@ -29,6 +29,8 @@ docker buildx build -t vallyian/dockman:local .
   * `cd ./client && ([ -d node_modules ] || npm i) && npm start`
   * `cd ./server && ([ -d node_modules ] || npm i) && npm start`
 
+=> [http://localhost/](http://localhost/)
+
 * local image
 
 ```sh
@@ -36,9 +38,11 @@ docker buildx build -t vallyian/dockman:local .
 docker run --name dockman-local --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /var/lib/docker/volumes:/var/lib/docker/volumes \
-    -p 127.0.0.1:5556:80 \
+    -p 127.0.0.1:55556:80 \
     vallyian/dockman:local
 ```
+
+=> [http://localhost:55556/](http://localhost:55556/)
 
 * public image
 
@@ -47,8 +51,18 @@ docker run --name dockman-local --rm \
 docker run --name dockman --pull always --restart=always -d \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /var/lib/docker/volumes:/var/lib/docker/volumes \
-    -p 127.0.0.1:5555:80 \
+    -p 127.0.0.1:55555:80 \
     vallyian/dockman:latest
 ```
 
-[http://localhost:5555/](http://localhost:5555/)
+=> [http://localhost:55555/](http://localhost:55555/)
+
+## Volumes in WSL
+
+If running Docker Desktop with WSL integration, app won't be able to access volumes (except names)
+Could still make Docker volume dir accessible in current WSL distro
+
+```sh
+mkdir -p /var/lib/docker/volumes
+mount -t drvfs '\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes' /var/lib/docker/volumes
+```
