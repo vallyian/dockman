@@ -68,11 +68,8 @@ COPY --from=build-server /app/bin/app/src/ ./
 COPY --from=build-client /app/dist client
 HEALTHCHECK --interval=60s --timeout=1s --start-period=5s --retries=3 \
     CMD [ $(wget --server-response http://localhost:80/health 2>&1 | awk '/^  HTTP/{print $2}') = 200 ] || exit 1
-VOLUME [ "/var/run/docker.sock" ]
 ENV SEMVER=${SEMVER}
 EXPOSE "80/tcp"
-VOLUME [ \
-    "/var/run/docker.sock", \
-    "/var/lib/docker/volumes" ]
+VOLUME [ "/var/run/docker.sock", "/var/lib/docker/volumes" ]
 ENTRYPOINT [ "node" ]
 CMD [ "." ]
