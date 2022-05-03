@@ -1,8 +1,6 @@
-/* https://www.typescriptlang.org/docs/handbook/compiler-options.html */
 {
 	"extends": "./tsconfig.json",
 	"include": [
-        "run.spec.ts",
         "src/**/*.spec.ts"
 	]
 }

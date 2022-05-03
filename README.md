@@ -26,8 +26,8 @@ docker buildx build -t vallyian/dockman:local .
 **Security warning**: Docker daemon has root access, so do NOT expose this outside `127.0.0.1` !!!
 
 * local folders
-  * `cd ./client && ([ -d node_modules ] || npm i) && npm start`
-  * `cd ./server && ([ -d node_modules ] || npm i) && npm start`
+  * `cd ./client && npm start`
+  * `cd ./server && npm start`
 
 => [http://localhost/](http://localhost/)
 
@@ -36,9 +36,9 @@ docker buildx build -t vallyian/dockman:local .
 ```sh
 (docker stop dockman-local && docker rm dockman-local || echo "not running") && \
 docker run --name dockman-local --rm \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /var/lib/docker/volumes:/var/lib/docker/volumes \
-    -p 127.0.0.1:55556:80 \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
+    -p "127.0.0.1:55556:80" \
     vallyian/dockman:local
 ```
 
@@ -49,9 +49,9 @@ docker run --name dockman-local --rm \
 ```sh
 (docker stop dockman && docker rm dockman || echo "not running") && \
 docker run --name dockman --pull always --restart=always -d \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /var/lib/docker/volumes:/var/lib/docker/volumes \
-    -p 127.0.0.1:55555:80 \
+    -v "/var/run/docker.sock:/var/run/docker.sock" \
+    -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
+    -p "127.0.0.1:55555:80" \
     vallyian/dockman:latest
 ```
 

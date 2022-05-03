@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import env from "../env";
 
-export default function (err: Error, req: Request, res: Response, _next: NextFunction) {
+import { env } from "../env";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function errorMiddleware (err: Error, req: Request, res: Response, _next: NextFunction) {
     const body = req.body;
     if (body instanceof Object) {
         if (body.password) body.password = "...omitted...";
@@ -9,7 +11,7 @@ export default function (err: Error, req: Request, res: Response, _next: NextFun
     }
 
     const errJson = {
-        status: (<any>err).status || 500,
+        status: err.status || 500,
         message: err.message || "internal server error",
         ...(env.NODE_ENV === "development" ? { stack: (err.stack || "").split(/\n/g).filter(l => !!l.trim()) } : {}),
         hostname: req.hostname,

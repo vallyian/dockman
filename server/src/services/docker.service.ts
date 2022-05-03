@@ -1,8 +1,9 @@
 import { execFile } from "child_process";
-import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces"
+import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces";
 
 type Part = "image" | "container" | "volume" | "network";
-type Cmd = "ls" | "inspect" | "logs" | "rm" | "start" | "stop";
+type ContainerAction = "start" | "stop";
+type Cmd = "ls" | "inspect" | "logs" | "rm" | ContainerAction;
 
 export function imageLs(id?: string): Promise<Error | Image[]> {
     return ls_exec<Image>("image", id, ["--no-trunc"])
@@ -35,9 +36,9 @@ export function imageLs(id?: string): Promise<Error | Image[]> {
 export function containerLs(): Promise<Error | Container[]> {
     return ls_exec<Container>("container", undefined, ["-a", "--no-trunc", "--size"])
         .then(cs => cs.map(c => {
-            c.PORTS = (<string><any>c.PORTS).split(",")
+            c.PORTS = (<string><unknown>c.PORTS).split(",")
                 .reduce((ps, p) => {
-                    const display = ((p.match(/\d+\.\d+\.\d+\.\d+\:(\d+\-\>\d+)\/tcp/) || [])[1] || "").replace("->", ":");
+                    const display = ((p.match(/\d+\.\d+\.\d+\.\d+:(\d+->\d+)\/tcp/) || [])[1] || "").replace("->", ":");
                     if (display)
                         ps.push(display + (p.startsWith("127.0.0.1:") ? " (local)" : ""));
                     return ps;
@@ -96,7 +97,7 @@ export function networkLs(): Promise<Error | Network[]> {
         .catch(asError);
 }
 
-export function container(action: "start" | "stop", id: string): Promise<Error | string> {
+export function container(action: ContainerAction, id: string): Promise<Error | string> {
     return docker_exec("container", action, [id])
         .then(r => asArray(r))
         .then(r => r[0] === id ? id : Promise.reject(r[0] || "response != id"))
@@ -111,16 +112,17 @@ export function logs(id: string): Promise<Error | Log[]> {
             let err = false;
             r.forEach(log => {
                 switch (log) {
-                    case "<ERROR>": err = true; break;
-                    case "</ERROR>": err = false; break;
-                    default:
-                        const entry = <Log>{
-                            dt: <any>(log.substring(0, 30)),
-                            log: log.substring(31, Infinity),
-                            err: !!err
-                        };
-                        if (entry.log.trim()) logsArr.push(entry);
-                        break;
+                case "<ERROR>": err = true; break;
+                case "</ERROR>": err = false; break;
+                default: {
+                    const entry = <Log>{
+                        dt: <unknown>(log.substring(0, 30)),
+                        log: log.substring(31, Infinity),
+                        err: !!err
+                    };
+                    if (entry.log.trim()) logsArr.push(entry);
+                    break;
+                }
                 }
             });
             return logsArr;
@@ -144,7 +146,7 @@ export function rm(part: Part, id: string): Promise<Error | string> {
         .catch(asError);
 }
 
-export function inspect(part: Part, id: string): Promise<Error | Object> {
+export function inspect(part: Part, id: string): Promise<Error | Record<string, unknown>> {
     return docker_exec(part, "inspect", [id])
         .then(r => JSON.parse(r)[0])
         .catch(asError);
@@ -152,7 +154,7 @@ export function inspect(part: Part, id: string): Promise<Error | Object> {
 
 async function ls_exec<T>(part: Part, id?: string, flags?: string[]): Promise<T[]> {
     const std = await docker_exec(part, "ls", id ? [id] : [], flags).then(r => asArray(r));
-    const head = std.shift()!;
+    const head = <string>std.shift();
     const keys = head.split(/\s{3,}/).reduce(
         (all, key, kx) => {
             all.push({
@@ -164,7 +166,7 @@ async function ls_exec<T>(part: Part, id?: string, flags?: string[]): Promise<T[
         },
         new Array<{ key: string, s: number, e?: number }>()
     );
-    return std.map(line => <T><any>keys.reduce(
+    return std.map(line => <T><unknown>keys.reduce(
         (data, k) => (data[k.key] = line.substring(k.s, k.e || Infinity).trim(), data),
         <Record<string, string>>{})
     );
@@ -209,8 +211,8 @@ function exec(command: string[]): Promise<string> {
             { timeout: 60 * 1000, shell: false },
             error => error ? rej(error) : ok(log)
         );
-        child.stdout?.on('data', data => log += <string>data);
-        child.stderr?.on('data', data => log += "\n<ERROR>\n" + <string>data + "\n</ERROR>\n");
+        child.stdout?.on("data", data => log += <string>data);
+        child.stderr?.on("data", data => log += "\n<ERROR>\n" + <string>data + "\n</ERROR>\n");
     });
 }
 
@@ -218,10 +220,10 @@ function asArray(input: string): string[] {
     return input.split("\n").reduce((all, l) => (l.trim() && all.push(l), all), new Array<string>());
 }
 
-function asJson(input: any) {
+function asJson(input: unknown) {
     return JSON.stringify(input);
 }
 
-function asError(e: any) {
-    return Error(e.message || asJson(e));
+function asError(e: unknown) {
+    return Error((<Error>e).message || asJson(e));
 }

@@ -1,6 +1,6 @@
 import * as os from "os";
 
-export default Object.freeze({
+export const env = Object.freeze({
     /* from process.env - required => throw if missing */
 
     /* from process.env - defaults implied */

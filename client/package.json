@@ -1,55 +1,69 @@
 {
-  "name": "@dockman/client",
-  "version": "0.0.0",
-  "private": true,
-  "license": "ISC",
-  "description": "dockman client",
-  "keywords": [
-    "dockman",
-    "client"
-  ],
-  "author": "vallyian@gmail.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vallyian/dockman.git"
-  },
-  "engines": {
-    "node": ">=16 <17",
-    "npm": ">=8 <9"
-  },
-  "scripts": {
-    "ng": "ng",
-    "build": "ng build -c production",
-    "start": "ng build --watch -c development",
-    "test": "ng test --code-coverage"
-  },
-  "dependencies": {
-    "@angular/animations": "^13.3.5",
-    "@angular/common": "^13.3.5",
-    "@angular/compiler": "^13.3.5",
-    "@angular/core": "^13.3.5",
-    "@angular/forms": "^13.3.5",
-    "@angular/platform-browser": "^13.3.5",
-    "@angular/platform-browser-dynamic": "^13.3.5",
-    "@angular/router": "^13.3.5",
-    "angular-svg-icon": "^13.0.0",
-    "ngx-json-viewer": "^3.0.2",
-    "rxjs": "~6.6.0",
-    "tslib": "^2.4.0",
-    "zone.js": "^0.11.5"
-  },
-  "devDependencies": {
-    "@angular-devkit/build-angular": "^13.3.4",
-    "@angular/cli": "^13.3.4",
-    "@angular/compiler-cli": "^13.3.5",
-    "@types/jasmine": "~3.8.0",
-    "@types/node": "^17.0.30",
-    "jasmine-core": "^4.1.0",
-    "karma": "^6.3.19",
-    "karma-chrome-launcher": "^3.1.1",
-    "karma-coverage": "^2.2.0",
-    "karma-jasmine": "^5.0.0",
-    "karma-jasmine-html-reporter": "^1.7.0",
-    "typescript": "~4.6.4"
-  }
+    "name": "@dockman/client",
+    "version": "0.0.0",
+    "private": true,
+    "license": "ISC",
+    "description": "dockman client",
+    "keywords": [
+        "dockman",
+        "client"
+    ],
+    "author": "vallyian@gmail.com",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/vallyian/dockman.git"
+    },
+    "engines": {
+        "node": ">=16 <17",
+        "npm": ">=8 <9"
+    },
+    "scripts": {
+        "ng": "ng",
+        "ci": "node -e \"fs.existsSync('node_modules') || child_process.execSync('npm ci', {stdio:'inherit'})\"",
+        "prelint": "npm run ci",
+        "lint": "ng lint",
+        "prebuild": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\" && npm run ci",
+        "build": "ng build -c production",
+        "pretest": "node -e \"fs.rmSync('test-results', { recursive: true, force: true })\" && npm run ci",
+        "test": "ng test --code-coverage",
+        "prestart": "node -e \"fs.rmSync('dist', { recursive: true, force: true }); fs.mkdirSync('dist')\" && echo refresh me > dist/index.html && npm run ci",
+        "start": "ng build --watch -c development --source-map --delete-output-path=false"
+    },
+    "dependencies": {
+        "@angular/animations": "^13.3.5",
+        "@angular/common": "^13.3.5",
+        "@angular/compiler": "^13.3.5",
+        "@angular/core": "^13.3.5",
+        "@angular/forms": "^13.3.5",
+        "@angular/platform-browser": "^13.3.5",
+        "@angular/platform-browser-dynamic": "^13.3.5",
+        "@angular/router": "^13.3.5",
+        "angular-svg-icon": "^13.0.0",
+        "ngx-json-viewer": "^3.0.2",
+        "rxjs": "~6.6.0",
+        "tslib": "^2.4.0",
+        "zone.js": "^0.11.5"
+    },
+    "devDependencies": {
+        "@angular-devkit/build-angular": "^13.3.4",
+        "@angular-eslint/builder": "13.2.1",
+        "@angular-eslint/eslint-plugin": "13.2.1",
+        "@angular-eslint/eslint-plugin-template": "13.2.1",
+        "@angular-eslint/schematics": "13.2.1",
+        "@angular-eslint/template-parser": "13.2.1",
+        "@angular/cli": "^13.3.4",
+        "@angular/compiler-cli": "^13.3.5",
+        "@types/jasmine": "~3.8.0",
+        "@types/node": "^17.0.30",
+        "@typescript-eslint/eslint-plugin": "5.17.0",
+        "@typescript-eslint/parser": "5.17.0",
+        "eslint": "^8.12.0",
+        "jasmine-core": "^4.1.0",
+        "karma": "^6.3.19",
+        "karma-chrome-launcher": "^3.1.1",
+        "karma-coverage": "^2.2.0",
+        "karma-jasmine": "^5.0.0",
+        "karma-jasmine-html-reporter": "^1.7.0",
+        "typescript": "~4.6.4"
+    }
 }
