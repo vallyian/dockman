@@ -40,13 +40,13 @@ RUN [ "${NPM_AUDIT_LEVEL}" != "" ] || NPM_AUDIT_LEVEL="low"; \
     npm ci
 COPY shared /shared
 COPY server/src ./src
-COPY server/.eslintrc.json server/tsconfig.app.json server/tsconfig.json ./
+COPY server/.eslintrc.json server/tsconfig.json ./
 RUN npm run lint
 ARG SEMVER
 RUN [ "${SEMVER}" != "" ] || SEMVER="0.0.0"; \
     echo "SEMVER: \"${SEMVER}\""; \
     npm run build
-COPY server/tsconfig.spec.json server/test.ts ./
+COPY server/test.ts .
 RUN npm test
 
 
