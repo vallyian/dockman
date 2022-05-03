@@ -1,14 +1,14 @@
-import { AfterViewInit, Component, HostListener, ViewChildren } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { AfterViewInit, Component, HostListener, ViewChildren } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { routes } from "../../../shared/routes";
 import { Image, Volume, Container, Network, Log } from "../../../shared/interfaces";
 
 type View = "images" | "containers" | "volumes" | "networks" | "logs" | "inspect";
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css']
+    selector: "app-root",
+    templateUrl: "./app.component.html",
+    styleUrls: ["./app.component.css"]
 })
 export class AppComponent implements AfterViewInit {
     readonly data = {
@@ -32,10 +32,10 @@ export class AppComponent implements AfterViewInit {
     set view(view: View) {
         this.viewData.current = view;
         this.ls(view);
-        this.filter.elem?.focus()
+        this.filter.elem?.focus();
     }
 
-    @ViewChildren('filterField') filterField: any;
+    @ViewChildren("filterField") filterField: any;
 
     private readonly viewData = {
         current: <View>"containers",
@@ -137,7 +137,7 @@ export class AppComponent implements AfterViewInit {
     }
 
     logs() {
-        if (this.view !== 'containers' || this.selected.items.length !== 1) return;
+        if (this.view !== "containers" || this.selected.items.length !== 1) return;
         this.viewData.previous = this.view;
         this.selected.previous = this.selected.items[0];
         this.http.get<Log[]>(`${routes.docker.base}${routes.docker.container.logs.replace(":id", encodeURIComponent(this.selected.items[0]))}`).subscribe(logs => {
@@ -151,7 +151,7 @@ export class AppComponent implements AfterViewInit {
     }
 
     closeDetails() {
-        if (!(['inspect', 'logs'].includes(this.view))) return;
+        if (!(["inspect", "logs"].includes(this.view))) return;
         this.view = this.viewData.previous || "containers";
         if (this.selected.previous) this.selected.items.push(this.selected.previous);
         this.data.inspect = undefined;

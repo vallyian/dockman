@@ -1,5 +1,6 @@
 import { execFile } from "child_process";
 import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces";
+import { logger } from "./logger.service";
 
 type Part = "image" | "container" | "volume" | "network";
 type ContainerAction = "start" | "stop";
@@ -20,14 +21,10 @@ export function imageLs(id?: string): Promise<Error | Image[]> {
             if (bt === "<none>") bt = "~";
             ar = ar.toUpperCase();
             br = br.toUpperCase();
-            if (ar < br)
-                return -1;
-            if (ar > br)
-                return 1;
-            if (at < bt)
-                return -1;
-            if (at > bt)
-                return 1;
+            if (ar < br) return -1;
+            if (ar > br) return 1;
+            if (at < bt) return -1;
+            if (at > bt) return 1;
             return 0;
         }))
         .catch(asError);
@@ -39,8 +36,7 @@ export function containerLs(): Promise<Error | Container[]> {
             c.PORTS = (<string><unknown>c.PORTS).split(",")
                 .reduce((ps, p) => {
                     const display = ((p.match(/\d+\.\d+\.\d+\.\d+:(\d+->\d+)\/tcp/) || [])[1] || "").replace("->", ":");
-                    if (display)
-                        ps.push(display + (p.startsWith("127.0.0.1:") ? " (local)" : ""));
+                    if (display) ps.push(display + (p.startsWith("127.0.0.1:") ? " (local)" : ""));
                     return ps;
                 }, new Array<string>());
             c.UP = /^Up /i.test(c.STATUS);
@@ -50,14 +46,10 @@ export function containerLs(): Promise<Error | Container[]> {
             return c;
         }))
         .then(c => c.sort((a, b) => {
-            if (a.NAMES < b.NAMES)
-                return -1;
-            if (a.NAMES > b.NAMES)
-                return 1;
-            if (a.IMAGE < b.IMAGE)
-                return -1;
-            if (a.IMAGE > b.IMAGE)
-                return 1;
+            if (a.NAMES < b.NAMES) return -1;
+            if (a.NAMES > b.NAMES) return 1;
+            if (a.IMAGE < b.IMAGE) return -1;
+            if (a.IMAGE > b.IMAGE) return 1;
             return 0;
         }))
         .catch(asError);
@@ -67,14 +59,10 @@ export function volumeLs(): Promise<Error | Volume[]> {
     return ls_exec<Volume>("volume")
         .then(v => du_exec(v))
         .then(v => v.sort((a, b) => {
-            if (a.NAME < b.NAME)
-                return -1;
-            if (a.NAME > b.NAME)
-                return 1;
-            if (a.DRIVER < b.DRIVER)
-                return -1;
-            if (a.DRIVER > b.DRIVER)
-                return 1;
+            if (a.NAME < b.NAME) return -1;
+            if (a.NAME > b.NAME) return 1;
+            if (a.DRIVER < b.DRIVER) return -1;
+            if (a.DRIVER > b.DRIVER) return 1;
             return 0;
         }))
         .catch(asError);
@@ -83,14 +71,10 @@ export function volumeLs(): Promise<Error | Volume[]> {
 export function networkLs(): Promise<Error | Network[]> {
     return ls_exec<Network>("network", undefined, ["--no-trunc"])
         .then(n => n.sort((a, b) => {
-            if (a.NAME < b.NAME)
-                return -1;
-            if (a.NAME > b.NAME)
-                return 1;
-            if (a.DRIVER < b.DRIVER)
-                return -1;
-            if (a.DRIVER > b.DRIVER)
-                return 1;
+            if (a.NAME < b.NAME) return -1;
+            if (a.NAME > b.NAME) return 1;
+            if (a.DRIVER < b.DRIVER) return -1;
+            if (a.DRIVER > b.DRIVER) return 1;
             return 0;
         }))
         .then(n => n.filter(n => n.NAME !== n.DRIVER && n.DRIVER !== "null"))
@@ -112,26 +96,24 @@ export function logs(id: string): Promise<Error | Log[]> {
             let err = false;
             r.forEach(log => {
                 switch (log) {
-                case "<ERROR>": err = true; break;
-                case "</ERROR>": err = false; break;
-                default: {
-                    const entry = <Log>{
-                        dt: <unknown>(log.substring(0, 30)),
-                        log: log.substring(31, Infinity),
-                        err: !!err
-                    };
-                    if (entry.log.trim()) logsArr.push(entry);
-                    break;
-                }
+                    case "<ERROR>": err = true; break;
+                    case "</ERROR>": err = false; break;
+                    default: {
+                        const entry = <Log>{
+                            dt: <unknown>(log.substring(0, 30)),
+                            log: log.substring(31, Infinity),
+                            err: !!err
+                        };
+                        if (entry.log.trim()) logsArr.push(entry);
+                        break;
+                    }
                 }
             });
             return logsArr;
         })
         .then(i => i.sort((a, b) => {
-            if (a.dt < b.dt)
-                return -1;
-            if (a.dt > b.dt)
-                return 1;
+            if (a.dt < b.dt) return -1;
+            if (a.dt > b.dt) return 1;
             return 0;
         }))
         .catch(asError);
@@ -189,7 +171,7 @@ async function du_exec(volumes: Volume[]) {
         .then(r => asArray(r))
         .then(r => r.map(line => line.split(/\s+/)))
         .then(sizes => volumes.map(v => ({ ...v, SIZE: (sizes.find(s => s[1] === `/var/lib/docker/volumes/${v.NAME}/_data`) || [])[0] || "-" })))
-        .catch(err => (console.error(err), volumes.map(v => ({ ...v, SIZE: "-" }))));
+        .catch(err => (logger.error(err), volumes.map(v => ({ ...v, SIZE: "-" }))));
 }
 
 function docker_exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number>): Promise<string> {
@@ -201,7 +183,7 @@ function docker_exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string |
 }
 
 function exec(command: string[]): Promise<string> {
-    console.log("=>", command.join(" "));
+    logger.log("=>", command.join(" "));
 
     return new Promise((ok, rej) => {
         let log = "";

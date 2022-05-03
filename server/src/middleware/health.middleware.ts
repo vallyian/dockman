@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function healthMiddleware(req: Request, res: Response, _next: NextFunction) {
+export function healthMiddleware(req: Request, res: Response) {
     return res.status(200).end(req.protocol);
 }

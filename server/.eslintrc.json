@@ -1,6 +1,6 @@
 {
     "env": {
-        "browser": true,
+        "node": true,
         "es2021": true
     },
     "extends": [
@@ -9,6 +9,7 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
+        "project": "**/tsconfig.json",
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
@@ -16,17 +17,21 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "indent": [
+        "indent": [ "error", 4, { "SwitchCase": 1 } ],
+        "quotes": [ "error", "double" ],
+        "semi": [ "error", "always" ],
+        "@typescript-eslint/no-floating-promises": [ "error" ],
+        "no-console": "off",
+        "no-restricted-syntax": [
             "error",
-            4
-        ],
-        "quotes": [
-            "error",
-            "double"
-        ],
-        "semi": [
-            "error",
-            "always"
+            {
+                "selector": "CallExpression[callee.object.name='console']",
+                "message": "Use logger.service instead of global console"
+            },
+            {
+                "selector": "CallExpression[callee.object.name='process'][callee.property.name=/^(exit)$/]",
+                "message": "This will terminate the app at runtime"
+            }
         ]
     }
 }

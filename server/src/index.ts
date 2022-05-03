@@ -1,10 +1,16 @@
+import assert from "assert";
 import cluster from "cluster";
 import * as os from "os";
 import { Application } from "express";
 import { env } from "./env";
 import { makeApp } from "./app";
+import { logger } from "./services/logger.service";
 
-serve(makeApp);
+serve(makeApp).catch((err: Error) => {
+    logger.error("Critical", err);
+    // eslint-disable-next-line no-restricted-syntax -- process is terminated on purpose when startup fails
+    process.exit(err.status || ExitCode.Generic);
+});
 
 enum ExitCode {
     Generic = 1,
@@ -18,51 +24,35 @@ enum ExitCode {
 }
 
 function serve(expressAppFactory: () => Application | Promise<Application>): Promise<void> {
-    process.on("uncaughtException", err => {
-        console.error("Critical", err);
-        process.exit(ExitCode.UncaughtException);
-    });
-
-    process.on("unhandledRejection", err => {
-        console.error("Critical", err);
-        process.exit(ExitCode.UnhandledRejection);
-    });
+    process.on("uncaughtException", (err: Error) => assert.fail({ ...err, status: ExitCode.UncaughtException }));
+    process.on("unhandledRejection", (err: Error) => assert.fail({ ...err, status: ExitCode.UnhandledRejection }));
 
     return (cluster.isPrimary
         ? clusterPrimary()
         : clusterWorker(expressAppFactory)
-    ).then(() => {/* void */ }).catch(err => {
-        console.error("Critical", err);
-        process.exit(ExitCode.Generic);
-    });
+    ).then(() => {/* void */ });
 }
 
 function clusterPrimary(): Promise<void> {
     return Promise.resolve()
         .then(() => validateMasterEnv())
-        .then(() => console.info("Info", `${env.NODE_ENV} server (main process ${process.pid}) starting on port ${env.PORT}`))
+        .then(() => logger.info("Info", `${env.NODE_ENV} server (main process ${process.pid}) starting on port ${env.PORT}`))
         .then(() => startWorkers());
 }
 
 function validateMasterEnv(): void {
-    if (!env.NODE_ENV) {
-        console.error("Critical", "env NODE_ENV invalid");
-        process.exit(ExitCode.Environment);
-    }
-    if (!env.PORT || env.PORT <= 0 || env.PORT > 65536) {
-        console.error("Critical", "env PORT invalid");
-        process.exit(ExitCode.Environment);
-    }
-    if (!env.CLUSTERS || env.CLUSTERS < 1 || env.CLUSTERS > os.cpus().length) {
-        console.error("Critical", "env CLUSTERS invalid");
-        process.exit(ExitCode.Environment);
-    }
+    env.NODE_ENV
+        || assert.fail({ ...Error("env NODE_ENV invalid"), status: ExitCode.Environment });
+    env.PORT > 0 && env.PORT <= 65536
+        || assert.fail({ ...Error("env PORT invalid"), status: ExitCode.Environment });
+    env.CLUSTERS > 0 && env.CLUSTERS <= os.cpus().length
+        || assert.fail({ ...Error("env CLUSTERS invalid"), status: ExitCode.Environment });
 }
 
 function startWorkers(): void {
     new Array(env.CLUSTERS).fill(null).forEach(() => cluster.fork(env));
     cluster.on("exit", (worker, code, signal) => {
-        console.error("Error", `worker ${worker.process.pid} exited; ${JSON.stringify({ code, signal })}`);
+        logger.error("Error", `worker ${worker.process.pid} exited; ${JSON.stringify({ code, signal })}`);
         cluster.fork();
     });
 }
@@ -70,10 +60,11 @@ function startWorkers(): void {
 function clusterWorker(expressAppFactory: () => Application | Promise<Application>): Promise<void> {
     return Promise.resolve()
         .then(() => expressAppFactory())
-        .then(app => app.listen(env.PORT, () => console.info("Info", `service (worker process ${process.pid}) is online`)))
+        .then(app => app.listen(env.PORT, () => logger.info("Info", `service (worker process ${process.pid}) is online`)))
         .then(() => { /* void */ })
         .catch(err => {
-            console.error("Critical", err);
+            logger.error("Critical", err);
+            // eslint-disable-next-line no-restricted-syntax -- worker is terminated on purpose, so that primary worker can fork a healthy one
             process.exit(ExitCode.WorkerStartup);
         });
 }

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-var-requires -- project is set to module but tests are commonjs */
 import * as os from "os";
 
 describe("env", () => {
