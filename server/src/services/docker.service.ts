@@ -1,6 +1,7 @@
-import { execFile } from "child_process";
+import { execFile } from "node:child_process";
+
+import { globals } from "../globals";
 import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces";
-import { logger } from "./logger.service";
 
 type Part = "image" | "container" | "volume" | "network";
 type ContainerAction = "start" | "stop";
@@ -171,7 +172,7 @@ async function du_exec(volumes: Volume[]) {
         .then(r => asArray(r))
         .then(r => r.map(line => line.split(/\s+/)))
         .then(sizes => volumes.map(v => ({ ...v, SIZE: (sizes.find(s => s[1] === `/var/lib/docker/volumes/${v.NAME}/_data`) || [])[0] || "-" })))
-        .catch(err => (logger.error(err), volumes.map(v => ({ ...v, SIZE: "-" }))));
+        .catch(err => (globals.console.error(err), volumes.map(v => ({ ...v, SIZE: "-" }))));
 }
 
 function docker_exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string | number>): Promise<string> {
@@ -183,7 +184,7 @@ function docker_exec(part: Part, cmd: Cmd, id?: string[], flags?: Array<string |
 }
 
 function exec(command: string[]): Promise<string> {
-    logger.log("=>", command.join(" "));
+    globals.console.log("=>", command.join(" "));
 
     return new Promise((ok, rej) => {
         let log = "";

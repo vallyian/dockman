@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires -- project is set to module but tests are commonjs */
-import * as os from "os";
+import * as os from "node:os";
 
 describe("env", () => {
     beforeEach(() => delete require.cache[require.resolve("./env")]);

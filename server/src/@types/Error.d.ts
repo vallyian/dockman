@@ -1,3 +1,3 @@
-interface Error extends global.Error {
+interface Error {
     status: number | undefined;
 }

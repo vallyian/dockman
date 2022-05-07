@@ -1,15 +1,16 @@
-import assert from "assert";
-import cluster from "cluster";
-import * as os from "os";
+import assert from "node:assert";
+import cluster from "node:cluster";
+import * as os from "node:os";
+
 import { Application } from "express";
+
+import { globals } from "./globals";
 import { env } from "./env";
 import { makeApp } from "./app";
-import { logger } from "./services/logger.service";
 
 serve(makeApp).catch((err: Error) => {
-    logger.error("Critical", err);
-    // eslint-disable-next-line no-restricted-syntax -- process is terminated on purpose when startup fails
-    process.exit(err.status || ExitCode.Generic);
+    globals.console.error("Critical", err);
+    globals.process.exit(err.status || ExitCode.Generic);
 });
 
 enum ExitCode {
@@ -24,8 +25,8 @@ enum ExitCode {
 }
 
 function serve(expressAppFactory: () => Application | Promise<Application>): Promise<void> {
-    process.on("uncaughtException", (err: Error) => assert.fail({ ...err, status: ExitCode.UncaughtException }));
-    process.on("unhandledRejection", (err: Error) => assert.fail({ ...err, status: ExitCode.UnhandledRejection }));
+    globals.process.on("uncaughtException", (err: Error) => assert.fail({ ...err, status: ExitCode.UncaughtException }));
+    globals.process.on("unhandledRejection", (err: Error) => assert.fail({ ...err, status: ExitCode.UnhandledRejection }));
 
     return (cluster.isPrimary
         ? clusterPrimary()
@@ -36,7 +37,7 @@ function serve(expressAppFactory: () => Application | Promise<Application>): Pro
 function clusterPrimary(): Promise<void> {
     return Promise.resolve()
         .then(() => validateMasterEnv())
-        .then(() => logger.info("Info", `${env.NODE_ENV} server (main process ${process.pid}) starting on port ${env.PORT}`))
+        .then(() => globals.console.info("Info", `${env.NODE_ENV} server (main process ${process.pid}) starting on port ${env.PORT}`))
         .then(() => startWorkers());
 }
 
@@ -52,7 +53,7 @@ function validateMasterEnv(): void {
 function startWorkers(): void {
     new Array(env.CLUSTERS).fill(null).forEach(() => cluster.fork(env));
     cluster.on("exit", (worker, code, signal) => {
-        logger.error("Error", `worker ${worker.process.pid} exited; ${JSON.stringify({ code, signal })}`);
+        globals.console.error("Error", `worker ${worker.process.pid} exited; ${JSON.stringify({ code, signal })}`);
         cluster.fork();
     });
 }
@@ -60,11 +61,10 @@ function startWorkers(): void {
 function clusterWorker(expressAppFactory: () => Application | Promise<Application>): Promise<void> {
     return Promise.resolve()
         .then(() => expressAppFactory())
-        .then(app => app.listen(env.PORT, () => logger.info("Info", `service (worker process ${process.pid}) is online`)))
+        .then(app => app.listen(env.PORT, () => globals.console.info("Info", `service (worker process ${process.pid}) is online`)))
         .then(() => { /* void */ })
         .catch(err => {
-            logger.error("Critical", err);
-            // eslint-disable-next-line no-restricted-syntax -- worker is terminated on purpose, so that primary worker can fork a healthy one
-            process.exit(ExitCode.WorkerStartup);
+            globals.console.error("Critical", err);
+            globals.process.exit(ExitCode.WorkerStartup);
         });
 }

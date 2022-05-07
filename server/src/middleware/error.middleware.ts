@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
+import { globals } from "../globals";
 import { env } from "../env";
-import { logger } from "../services/logger.service";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- required by express to correctly interpret as error middleware
 export function errorMiddleware (err: Error, req: Request, res: Response, _next: NextFunction) {
@@ -26,7 +26,7 @@ export function errorMiddleware (err: Error, req: Request, res: Response, _next:
         body,
     };
 
-    logger.error(errJson);
+    globals.console.error(errJson);
 
     return res
         .status(errJson.status)

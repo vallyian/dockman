@@ -1,4 +1,4 @@
-import * as os from "os";
+import * as os from "node:os";
 
 export const env = Object.freeze({
     /* from process.env - required => throw if missing */

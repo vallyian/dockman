@@ -25,12 +25,8 @@
         "no-restricted-syntax": [
             "error",
             {
-                "selector": "CallExpression[callee.object.name='console']",
-                "message": "Use logger.service instead of global console"
-            },
-            {
-                "selector": "CallExpression[callee.object.name='process'][callee.property.name=/^(exit)$/]",
-                "message": "This will terminate the app at runtime"
+                "selector": "CallExpression[callee.object.name=/^(console|process)$/]",
+                "message": "Use globals.ts instead"
             }
         ]
     }
