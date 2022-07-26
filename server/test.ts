@@ -1,6 +1,10 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const Jasmine = require("jasmine");
 const { JUnitXmlReporter } = require("jasmine-reporters");
 const { SpecReporter, StacktraceOption } = require("jasmine-spec-reporter");
+
 const { name } = require("./package.json");
 
 const runner = new Jasmine();
@@ -25,4 +29,7 @@ runner.addReporter(
     })
 );
 
-runner.execute();
+runner.execute().catch(() => {
+    console.error("test run failed");
+    process.exit(1);
+});

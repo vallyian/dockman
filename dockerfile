@@ -54,7 +54,7 @@ RUN npm test
 FROM docker:20.10.14-alpine3.15
 RUN apk add nodejs-lts npm
 WORKDIR /app
-COPY --from=build-server /app/bin/index.cjs index.js
+COPY --from=build-server /app/bin/index.cjs index.cjs
 COPY --from=build-client /app/dist client
 ARG SEMVER
 ENV SEMVER=${SEMVER}
@@ -63,4 +63,4 @@ HEALTHCHECK --interval=60s --timeout=1s --start-period=5s --retries=3 \
 EXPOSE "80/tcp"
 VOLUME [ "/var/run/docker.sock", "/var/lib/docker/volumes" ]
 ENTRYPOINT [ "node" ]
-CMD [ "." ]
+CMD [ "index.cjs" ]

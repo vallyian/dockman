@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import * as os from "node:os";
 
 export const env = Object.freeze({
@@ -16,6 +17,6 @@ function e(env: string, required: ErrorConstructor | string): string {
     return typeof val !== "undefined"
         ? String(val).trim()
         : (<ErrorConstructor>required).name === "Error"
-            ? (() => { throw Error(`env var ${env} not set`); })()
+            ? assert.fail(`env var ${env} not set`)
             : <string>required;
 }
