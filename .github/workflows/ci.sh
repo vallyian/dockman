@@ -1,6 +1,7 @@
 #!/bin/sh -e
 
 DOCKER_REPO=${DOCKER_REPO:-dockman}
+PLATFORMS=linux/amd64,linux/arm64/v8
 
 github_env() {
     echo "::set-output name=GITHUB_MAIN::${GITHUB_MAIN}"
@@ -57,7 +58,7 @@ push() {
         -t ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} \
         -t ${DOCKER_USERNAME}/${DOCKER_REPO}:latest \
         --build-arg SEMVER \
-        --platform linux/amd64,linux/arm64/v8 \
+        --platform ${PLATFORMS} \
         --pull \
         --push \
         . \
