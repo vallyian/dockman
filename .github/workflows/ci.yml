@@ -11,7 +11,12 @@ on:
         paths-ignore:
             - ".vscode/**"
             - "**/*.md"
-
+    workflow_dispatch:
+        inputs:
+            publish_image:
+                description: "Push runtime image to Docker Hub"
+                default: "false"
+                required: false
 jobs:
     semver:
         name: Semantic version
@@ -22,33 +27,33 @@ jobs:
             - name: Github env
               id: github_env
               env:
-                GITHUB_MAIN: ${{ github.ref == 'refs/heads/main' }}
+                  GITHUB_MAIN: ${{ github.ref == 'refs/heads/main' }}
               run: |
-                echo "::set-output name=GITHUB_MAIN::${GITHUB_MAIN}"
+                  echo "::set-output name=GITHUB_MAIN::${GITHUB_MAIN}"
 
             - name: Tag version
               id: tag_version
               uses: mathieudutour/github-tag-action@d745f2e74aaf1ee82e747b181f7a0967978abee0 # v6.0
               with:
-                github_token: ${{ secrets.GITHUB_TOKEN }}
-                dry_run: ${{ steps.github_env.outputs.GITHUB_MAIN != 'true' }}
-                create_annotated_tag: true
-                release_branches: "^main$"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  dry_run: ${{ steps.github_env.outputs.GITHUB_MAIN != 'true' }}
+                  create_annotated_tag: true
+                  release_branches: "^main$"
 
             - name: Calc semver
               id: calc_semver
               env:
-                GITHUB_SHA: ${{ github.sha }}
-                GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
-                SEMVER: ${{ steps.tag_version.outputs.new_version }}
+                  GITHUB_SHA: ${{ github.sha }}
+                  GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
+                  SEMVER: ${{ steps.tag_version.outputs.new_version }}
               run: |
-                if [ "${GITHUB_MAIN}" = "true" ]; then
-                    echo "SEMVER: ${SEMVER}"
-                    echo "::set-output name=SEMVER::${SEMVER}"
-                else
-                    echo "SEMVER: ${SEMVER}-${GITHUB_SHA}"
-                    echo "::set-output name=SEMVER::${SEMVER}-${GITHUB_SHA}"
-                fi
+                  if [ "${GITHUB_MAIN}" = "true" ]; then
+                      echo "SEMVER: ${SEMVER}"
+                      echo "::set-output name=SEMVER::${SEMVER}"
+                  else
+                      echo "SEMVER: ${SEMVER}-${GITHUB_SHA}"
+                      echo "::set-output name=SEMVER::${SEMVER}-${GITHUB_SHA}"
+                  fi
 
         outputs:
             GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
@@ -70,24 +75,24 @@ jobs:
 
             - uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6 # v2.0.0
 
-            - name: Log in to Docker Hub
-              uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # v1.14.1
-              if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' }}
-              with:
-                username: ${{secrets.DOCKER_USERNAME}}
-                password: ${{secrets.DOCKER_PASSWORD}}
-
             - name: Build, test and extract artifacts
               run: docker buildx build --pull --target export -o artifacts .
 
+            - name: Log in to Docker Hub
+              uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # v1.14.1
+              if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
+              with:
+                  username: ${{secrets.DOCKER_USERNAME}}
+                  password: ${{secrets.DOCKER_PASSWORD}}
+
             - name: Build multiplatform runtime and push
-              if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' }}
+              if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
               run: |
-                docker buildx build \
-                  -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
-                  -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
-                  --pull \
-                  --build-arg SEMVER \
-                  --platform linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x \
-                  --push \
-                  .
+                  docker buildx build \
+                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
+                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
+                    --pull \
+                    --build-arg SEMVER \
+                    --platform linux/amd64,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x \
+                    --push \
+                    .
