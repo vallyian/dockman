@@ -84,14 +84,26 @@ jobs:
                   name: server-runtime
                   path: artifacts/runtime
 
-            - name: Scan
+
+            - name: Build multiplatform runtime image
+              if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
+              run: |
+                  docker buildx build \
+                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
+                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
+                    --build-arg SEMVER \
+                    --platform linux/amd64,linux/arm64/v8 \
+                    --pull \
+                    .
+
+            - name: Scan multiplatform runtime image
               run: |
                   docker run --rm \
                     -v /var/run/docker.sock:/var/run/docker.sock \
                     aquasec/trivy \
                         image \
                             --exit-code=1 \
-                            vallyian/dockman:local
+                            ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER}
 
             - name: Log in to Docker Hub
               uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # v1.14.1
@@ -100,13 +112,12 @@ jobs:
                   username: ${{secrets.DOCKER_USERNAME}}
                   password: ${{secrets.DOCKER_PASSWORD}}
 
-            - name: Build multiplatform runtime and push
+            - name: Push multiplatform runtime image to Docker Hub
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
               run: |
                   docker buildx build \
                     -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
                     -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
-                    --pull \
                     --build-arg SEMVER \
                     --platform linux/amd64,linux/arm64/v8 \
                     --push \
