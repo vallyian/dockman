@@ -77,7 +77,7 @@ jobs:
                   name: server-runtime
                   path: artifacts/runtime
 
-            - name: (prebuild and) Scan multiplatform runtime image
+            - name: Scan runtime image
               env:
                   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
               run: ./.github/workflows/ci.sh scan
@@ -89,7 +89,7 @@ jobs:
                   username: ${{secrets.DOCKER_USERNAME}}
                   password: ${{secrets.DOCKER_PASSWORD}}
 
-            - name: (re)Build and push multiplatform runtime image to Docker Hub
+            - name: Build and push multiplatform runtime image to Docker Hub
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
               env:
                   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}

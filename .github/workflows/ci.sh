@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+DOCKER_USERNAME=${DOCKER_USERNAME:-vallyian}
+DOCKER_REPO=${DOCKER_REPO:-dockman}
+
 github_env() {
     echo "::set-output name=GITHUB_MAIN::${GITHUB_MAIN}"
 }
@@ -24,26 +27,24 @@ build() {
 
 scan() {
     docker buildx build \
-        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} \
-        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:latest \
+        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:scan \
         --build-arg SEMVER \
-        --platform linux/amd64,linux/arm64/v8 \
-        --output type=tar,dest=${DOCKER_REPO}-${SEMVER}.tar \
         --pull \
         . \
     || exit 1
 
-    docker load -i ${DOCKER_REPO}-${SEMVER}.tar \
-    || exit 1
-
-    rm -rf ${DOCKER_REPO}-${SEMVER}.tar
-
-    docker run --rm \
+    docker run \
+        --rm \
+        --pull always \
         -v /var/run/docker.sock:/var/run/docker.sock \
+        -v ${HOME}/.trivy/cache:/root/.cache \
         aquasec/trivy \
             image \
                 --exit-code=1 \
-                ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} \
+                ${DOCKER_USERNAME}/${DOCKER_REPO}:scan \
+    || exit 1
+
+    docker image rm ${DOCKER_USERNAME}/${DOCKER_REPO}:scan \
     || exit 1
 }
 
@@ -53,6 +54,7 @@ push() {
         -t ${DOCKER_USERNAME}/${DOCKER_REPO}:latest \
         --build-arg SEMVER \
         --platform linux/amd64,linux/arm64/v8 \
+        --pull \
         --push \
         . \
     || exit 1
