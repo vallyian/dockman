@@ -28,6 +28,7 @@ scan() {
     docker buildx build \
         -t ${DOCKER_REPO}:scan \
         --build-arg SEMVER \
+        --load \
         . \
     || exit 1
 
@@ -36,6 +37,7 @@ scan() {
 
     docker run \
         --rm \
+        --pull always \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v ${HOME}/.trivy/cache:/root/.cache \
         -v ${PWD}:/config \
