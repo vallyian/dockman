@@ -4,8 +4,8 @@
 # **/.github
 **/.vscode/**
 **/artifacts
-# !**/artifacts/index.cjs
-# !**/artifacts/client
+# !**/artifacts/runtime/index.cjs
+# !**/artifacts/runtime/client
 **/bin
 **/dist
 **/node_modules
