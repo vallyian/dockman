@@ -18,9 +18,13 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 ## Build
 
 ```sh
-rm -rf artifacts && \
-docker buildx build --pull --target export -o artifacts . && \
-docker buildx build --pull -t vallyian/dockman:local .
+./run.sh build
+```
+
+## Scan for vulnerabilities
+
+```sh
+./run.sh scan
 ```
 
 ## Run
