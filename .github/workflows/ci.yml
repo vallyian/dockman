@@ -17,6 +17,7 @@ on:
                 description: "Push runtime image to Docker Hub"
                 default: "false"
                 required: false
+
 jobs:
     semver:
         name: Semantic version
@@ -76,8 +77,9 @@ jobs:
                   name: server-runtime
                   path: artifacts/runtime
 
-            - name: Prebuild and scan multiplatform runtime image
-              if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
+            - name: (prebuild and) Scan multiplatform runtime image
+              env:
+                  DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
               run: ./.github/workflows/ci.sh scan
 
             - name: Log in to Docker Hub
@@ -87,6 +89,8 @@ jobs:
                   username: ${{secrets.DOCKER_USERNAME}}
                   password: ${{secrets.DOCKER_PASSWORD}}
 
-            - name: (Re)Build and push multiplatform runtime image to Docker Hub
+            - name: (re)Build and push multiplatform runtime image to Docker Hub
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
+              env:
+                  DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
               run: ./.github/workflows/ci.sh push

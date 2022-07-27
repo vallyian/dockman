@@ -24,8 +24,8 @@ build() {
 
 scan() {
     docker buildx build \
-        -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
-        -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
+        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} \
+        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:latest \
         --build-arg SEMVER \
         --platform linux/amd64,linux/arm64/v8 \
         --output type=tar,dest=${DOCKER_REPO}-${SEMVER}.tar \
@@ -43,14 +43,14 @@ scan() {
         aquasec/trivy \
             image \
                 --exit-code=1 \
-                ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
+                ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} \
     || exit 1
 }
 
 push() {
     docker buildx build \
-        -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
-        -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
+        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:${SEMVER} \
+        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:latest \
         --build-arg SEMVER \
         --platform linux/amd64,linux/arm64/v8 \
         --push \
