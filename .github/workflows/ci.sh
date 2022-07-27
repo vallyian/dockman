@@ -27,7 +27,7 @@ build() {
 
 scan() {
     docker buildx build \
-        -t ${DOCKER_USERNAME}/${DOCKER_REPO}:scan \
+        -t ${DOCKER_USERNAME}-${DOCKER_REPO}:scan \
         --build-arg SEMVER \
         --pull \
         . \
@@ -38,13 +38,14 @@ scan() {
         --pull always \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v ${HOME}/.trivy/cache:/root/.cache \
+        -v ${PWD}:/config \
         aquasec/trivy \
             image \
                 --exit-code=1 \
-                ${DOCKER_USERNAME}/${DOCKER_REPO}:scan \
+                ${DOCKER_USERNAME}-${DOCKER_REPO}:scan \
     || exit 1
 
-    docker image rm ${DOCKER_USERNAME}/${DOCKER_REPO}:scan \
+    docker image rm ${DOCKER_USERNAME}-${DOCKER_REPO}:scan \
     || exit 1
 }
 
