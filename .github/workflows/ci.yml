@@ -84,6 +84,15 @@ jobs:
                   name: server-runtime
                   path: artifacts/runtime
 
+            - name: Scan
+              run: |
+                  docker run --rm \
+                    -v /var/run/docker.sock:/var/run/docker.sock \
+                    aquasec/trivy \
+                        image \
+                            --exit-code=1 \
+                            vallyian/dockman:local
+
             - name: Log in to Docker Hub
               uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # v1.14.1
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}

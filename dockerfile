@@ -59,7 +59,8 @@ COPY --from=build-client /app/dist /runtime/client
 
 # TODO: use 22 after beta ends: 22.06.0-beta.0-alpine3.16
 FROM docker:20.10.17-alpine3.16
-RUN apk add nodejs-lts npm
+RUN rm -rf /usr/libexec/docker/cli-plugins/docker-compose /usr/libexec/docker/cli-plugins/docker-buildx && \
+    apk add nodejs-lts npm
 WORKDIR /app
 COPY artifacts/runtime/index.cjs index.cjs
 COPY artifacts/runtime/client client
