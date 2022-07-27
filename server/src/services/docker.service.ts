@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 
-import { globals } from "../globals";
+import { globals } from "../../globals";
 import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces";
 
 type Part = "image" | "container" | "volume" | "network";

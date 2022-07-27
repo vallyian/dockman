@@ -4,7 +4,7 @@ import * as os from "node:os";
 
 import { Application } from "express";
 
-import { globals } from "./globals";
+import { globals } from "../globals";
 import { env } from "./env";
 import { makeApp } from "./app";
 

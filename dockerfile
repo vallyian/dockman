@@ -40,7 +40,7 @@ RUN [ "${NPM_AUDIT_LEVEL}" != "" ] || NPM_AUDIT_LEVEL="low"; \
     npm ci
 COPY shared /shared
 COPY server/src ./src
-COPY server/.eslintrc.json server/tsconfig.json ./
+COPY server/.eslintrc.json server/global.ts server/tsconfig.json ./
 RUN npm run lint
 ARG SEMVER
 RUN [ "${SEMVER}" != "" ] || SEMVER="0.0.0"; \
