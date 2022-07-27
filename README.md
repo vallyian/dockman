@@ -18,7 +18,9 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 ## Build
 
 ```sh
-docker buildx build -t vallyian/dockman:local .
+rm -rf artifacts && \
+docker buildx build --pull --target export -o artifacts . && \
+docker buildx build --pull -t vallyian/dockman:local .
 ```
 
 ## Run

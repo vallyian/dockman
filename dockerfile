@@ -51,11 +51,18 @@ RUN npm test
 
 
 
-FROM docker:20.10.14-alpine3.15
+FROM scratch as export
+COPY --from=build-server /app/bin/index.cjs /index.cjs
+COPY --from=build-client /app/dist /client
+
+
+
+# TODO: use 22 after beta ends: 22.06.0-beta.0-alpine3.16
+FROM docker:20.10.17-alpine3.16
 RUN apk add nodejs-lts npm
 WORKDIR /app
-COPY --from=build-server /app/bin/index.cjs index.cjs
-COPY --from=build-client /app/dist client
+COPY artifacts/index.cjs index.cjs
+COPY artifacts/client client
 ARG SEMVER
 ENV SEMVER=${SEMVER}
 HEALTHCHECK --interval=60s --timeout=1s --start-period=5s --retries=3 \
