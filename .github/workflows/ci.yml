@@ -28,8 +28,7 @@ jobs:
               id: github_env
               env:
                   GITHUB_MAIN: ${{ github.ref == 'refs/heads/main' }}
-              run: |
-                  echo "::set-output name=GITHUB_MAIN::${GITHUB_MAIN}"
+              run: ./.github/workflows/ci.sh github_env
 
             - name: Tag version
               id: tag_version
@@ -46,14 +45,7 @@ jobs:
                   GITHUB_SHA: ${{ github.sha }}
                   GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
                   SEMVER: ${{ steps.tag_version.outputs.new_version }}
-              run: |
-                  if [ "${GITHUB_MAIN}" = "true" ]; then
-                      echo "SEMVER: ${SEMVER}"
-                      echo "::set-output name=SEMVER::${SEMVER}"
-                  else
-                      echo "SEMVER: ${SEMVER}-${GITHUB_SHA}"
-                      echo "::set-output name=SEMVER::${SEMVER}-${GITHUB_SHA}"
-                  fi
+              run: ./.github/workflows/ci.sh calc_semver
 
         outputs:
             GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
@@ -76,7 +68,7 @@ jobs:
             - uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6 # v2.0.0
 
             - name: Build, test and extract artifacts
-              run: docker buildx build --pull --target export -o artifacts .
+              run: ./.github/workflows/ci.sh build
 
             - name: Upload server runtime
               uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # v3.1.0
@@ -84,29 +76,9 @@ jobs:
                   name: server-runtime
                   path: artifacts/runtime
 
-
-            - name: Build multiplatform runtime image
+            - name: Prebuild and scan multiplatform runtime image
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
-              run: |
-                  docker buildx build \
-                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
-                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
-                    --build-arg SEMVER \
-                    --platform linux/amd64,linux/arm64/v8 \
-                    --output type=tar,dest=${DOCKER_REPO}-${SEMVER}.tar
-                    --pull \
-                    .
-                  docker load -i ${DOCKER_REPO}-${SEMVER}.tar
-                  rm -rf ${DOCKER_REPO}-${SEMVER}.tar
-
-            - name: Scan multiplatform runtime image
-              run: |
-                  docker run --rm \
-                    -v /var/run/docker.sock:/var/run/docker.sock \
-                    aquasec/trivy \
-                        image \
-                            --exit-code=1 \
-                            ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER}
+              run: ./.github/workflows/ci.sh scan
 
             - name: Log in to Docker Hub
               uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7 # v1.14.1
@@ -115,13 +87,6 @@ jobs:
                   username: ${{secrets.DOCKER_USERNAME}}
                   password: ${{secrets.DOCKER_PASSWORD}}
 
-            - name: Push multiplatform runtime image to Docker Hub
+            - name: (Re)Build and push multiplatform runtime image to Docker Hub
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
-              run: |
-                  docker buildx build \
-                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:${SEMVER} \
-                    -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
-                    --build-arg SEMVER \
-                    --platform linux/amd64,linux/arm64/v8 \
-                    --push \
-                    .
+              run: ./.github/workflows/ci.sh push
