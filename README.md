@@ -26,12 +26,21 @@ docker buildx build --pull -t vallyian/dockman:local .
 ## Run
 
 **Security warning**: Docker daemon has root access, so do NOT expose this outside `127.0.0.1` !!!
+**Info** generate self-signed certs with `openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -out cert.pem -keyout key.pem`  
+**Info** running containers without certs will have an "unhealthy" status  
 
 * local folders
-  * `cd ./client && npm start`
-  * `cd ./server && npm start`
 
-=> [http://localhost/](http://localhost/)
+```sh
+# first console
+npm --prefix client start
+# second console
+export CERTS_DIR="/optional/certs/dir" # optional
+export DEBUG="*" # optional
+npm --prefix server start
+```
+
+=> [http://localhost:55557/](http://localhost:55557/)
 
 * local image
 
@@ -40,7 +49,8 @@ docker buildx build --pull -t vallyian/dockman:local .
 docker run --name dockman-local --rm \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -p "127.0.0.1:55556:80" \
+    -v "/optional/certs/dir:/certs" \
+    -p "127.0.0.1:55556:55557" \
     vallyian/dockman:local
 ```
 
@@ -53,7 +63,8 @@ docker run --name dockman-local --rm \
 docker run --name dockman --pull always --restart=always -d \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -p "127.0.0.1:55555:80" \
+    -v "/optional/certs/dir:/certs" \
+    -p "127.0.0.1:55555:55557" \
     vallyian/dockman:latest
 ```
 

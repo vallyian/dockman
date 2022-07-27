@@ -35,16 +35,30 @@ describe("env", () => {
     });
 
     describe("PORT", () => {
-        it("default is 80", () => {
+        it("default is 55557", () => {
             delete process.env.PORT;
             const { env } = require("./env");
-            expect(env.PORT).toEqual(80);
+            expect(env.PORT).toEqual(55557);
         });
 
         it("is overwritten", () => {
             process.env.PORT = "42";
             const { env } = require("./env");
             expect(env.PORT).toEqual(+process.env.PORT);
+        });
+    });
+
+    describe("CERTS_DIR", () => {
+        it("default is blank", () => {
+            delete process.env.CERTS_DIR;
+            const { env } = require("./env");
+            expect(env.CERTS_DIR).toEqual("");
+        });
+
+        it("is overwritten", () => {
+            process.env.CERTS_DIR = "overwritten";
+            const { env } = require("./env");
+            expect(env.CERTS_DIR).toEqual(process.env.CERTS_DIR);
         });
     });
 });

@@ -9,7 +9,8 @@ export const env = Object.freeze({
     /* from process.env - defaults implied */
     NODE_ENV: e("NODE_ENV", "production"),
     CLUSTERS: e("NODE_ENV", "") === "development" ? 1 : os.cpus().length,
-    PORT: +e("PORT", "80"),
+    PORT: +e("PORT", "55557"),
+    CERTS_DIR: e("CERTS_DIR", ""),
 
     /* other */
 });
