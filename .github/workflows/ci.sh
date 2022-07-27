@@ -1,6 +1,5 @@
 #!/bin/sh -e
 
-DOCKER_USERNAME=${DOCKER_USERNAME:-vallyian}
 DOCKER_REPO=${DOCKER_REPO:-dockman}
 
 github_env() {
@@ -27,26 +26,27 @@ build() {
 
 scan() {
     docker buildx build \
-        -t ${DOCKER_USERNAME}-${DOCKER_REPO}:scan \
+        -t ${DOCKER_REPO}:scan \
         --build-arg SEMVER \
-        --pull \
         . \
     || exit 1
 
+    docker image inspect ${DOCKER_REPO}:scan > /dev/null \
+    || exit 2
+
     docker run \
         --rm \
-        --pull always \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v ${HOME}/.trivy/cache:/root/.cache \
         -v ${PWD}:/config \
         aquasec/trivy \
             image \
                 --exit-code=1 \
-                ${DOCKER_USERNAME}-${DOCKER_REPO}:scan \
-    || exit 1
+                ${DOCKER_REPO}:scan \
+    || exit 3
 
-    docker image rm ${DOCKER_USERNAME}-${DOCKER_REPO}:scan \
-    || exit 1
+    docker image rm ${DOCKER_REPO}:scan \
+    || exit 4
 }
 
 push() {
