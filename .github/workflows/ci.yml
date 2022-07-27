@@ -93,8 +93,11 @@ jobs:
                     -t ${{secrets.DOCKER_USERNAME}}/${DOCKER_REPO}:latest \
                     --build-arg SEMVER \
                     --platform linux/amd64,linux/arm64/v8 \
+                    --output type=tar,dest=${DOCKER_REPO}-${SEMVER}.tar
                     --pull \
                     .
+                  docker load -i ${DOCKER_REPO}-${SEMVER}.tar
+                  rm -rf ${DOCKER_REPO}-${SEMVER}.tar
 
             - name: Scan multiplatform runtime image
               run: |
