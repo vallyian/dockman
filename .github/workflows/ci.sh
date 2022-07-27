@@ -28,6 +28,7 @@ scan() {
     docker buildx build \
         -t ${DOCKER_REPO}:scan \
         --build-arg SEMVER \
+        --pull \
         --load \
         . \
     || exit 1
