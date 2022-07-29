@@ -48,17 +48,31 @@ describe("env", () => {
         });
     });
 
-    describe("CERTS_DIR", () => {
-        it("default is blank", () => {
-            delete process.env.CERTS_DIR;
+    describe("CERT_CRT", () => {
+        it("default is /run/secrets/cert.crt", () => {
+            delete process.env.CERT_CRT;
             const { env } = require("./env");
-            expect(env.CERTS_DIR).toEqual("");
+            expect(env.CERT_CRT).toEqual("/run/secrets/cert.crt");
         });
 
         it("is overwritten", () => {
-            process.env.CERTS_DIR = "overwritten";
+            process.env.CERT_CRT = "overwritten";
             const { env } = require("./env");
-            expect(env.CERTS_DIR).toEqual(process.env.CERTS_DIR);
+            expect(env.CERT_CRT).toEqual(process.env.CERT_CRT);
+        });
+    });
+
+    describe("CERT_KEY", () => {
+        it("default is /run/secrets/cert.key", () => {
+            delete process.env.CERT_KEY;
+            const { env } = require("./env");
+            expect(env.CERT_KEY).toEqual("/run/secrets/cert.key");
+        });
+
+        it("is overwritten", () => {
+            process.env.CERT_KEY = "overwritten";
+            const { env } = require("./env");
+            expect(env.CERT_KEY).toEqual(process.env.CERT_KEY);
         });
     });
 });

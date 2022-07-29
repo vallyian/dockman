@@ -30,8 +30,7 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 ## Run
 
 **Security warning**: Docker daemon has root access, so do NOT expose this outside `127.0.0.1` !!!
-**Info** generate self-signed certs with `openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -out cert.pem -keyout key.pem`  
-**Info** running containers without certs will have an "unhealthy" status  
+**Info** generate self-signed certs with `openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -out cert.crt -keyout cert.key`  
 
 * local folders
 
@@ -39,7 +38,8 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 # first console
 npm --prefix client start
 # second console
-export CERTS_DIR="/optional/certs/dir" # optional
+export CERT_CRT="/run/secrets/cert.crt" # optional
+export CERT_KEY="/run/secrets/cert.key" # optional
 export DEBUG="*" # optional
 npm --prefix server start
 ```
@@ -53,7 +53,8 @@ npm --prefix server start
 docker run --name dockman-local --rm \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -v "${HOME}/certs:/certs" \
+    -v "${HOME}/certs/cert.crt:/run/secrets/cert.crt" `# optional` \
+    -v "${HOME}/certs/cert.key:/run/secrets/cert.key" `# optional` \
     -p "127.0.0.1:55556:55557" \
     vallyian/dockman:local
 ```
@@ -67,7 +68,8 @@ docker run --name dockman-local --rm \
 docker run --name dockman --pull always --restart=always -d \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -v "${HOME}/certs:/certs" \
+    -v "${HOME}/certs/cert.crt:/run/secrets/cert.crt" `# optional` \
+    -v "${HOME}/certs/cert.key:/run/secrets/cert.key" `# optional` \
     -p "127.0.0.1:55555:55557" \
     vallyian/dockman:latest
 ```

@@ -108,8 +108,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let volume of data.volumes; let row = index;" [ngClass]="{ select: selected.items.includes(volume.NAME) }"
-                (click)="select(row, $event)">
+            <tr *ngFor="let volume of data.volumes; let row = index;"
+                [ngClass]="{ select: selected.items.includes(volume.NAME) }" (click)="select(row, $event)">
                 <td>{{volume.NAME}}</td>
                 <td>{{volume.DRIVER}}</td>
                 <td>{{volume.SIZE}}</td>
@@ -127,8 +127,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let network of data.networks; let row = index;" [ngClass]="{ select: selected.items.includes(network.ID) }"
-                (click)="select(row, $event)">
+            <tr *ngFor="let network of data.networks; let row = index;"
+                [ngClass]="{ select: selected.items.includes(network.ID) }" (click)="select(row, $event)">
                 <!-- <td>{{network.ID}}</td> -->
                 <td>{{network.NAME}}</td>
                 <td>{{network.DRIVER}}</td>
@@ -137,7 +137,8 @@
         </tbody>
     </table>
 
-    <ngx-json-viewer *ngIf="view === 'inspect' && data.inspect" [json]="data.inspect" [expanded]="false" class="inspect">
+    <ngx-json-viewer *ngIf="view === 'inspect' && data.inspect" [json]="data.inspect" [expanded]="false"
+        class="inspect">
     </ngx-json-viewer>
 
     <table *ngIf="view === 'logs' && data.logs" class="logs">

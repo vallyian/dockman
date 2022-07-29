@@ -10,7 +10,8 @@ export const env = Object.freeze({
     NODE_ENV: e("NODE_ENV", "production"),
     CLUSTERS: e("NODE_ENV", "") === "development" ? 1 : os.cpus().length,
     PORT: +e("PORT", "55557"),
-    CERTS_DIR: e("CERTS_DIR", ""),
+    CERT_CRT: e("CERT_CRT", "/run/secrets/cert.crt"),
+    CERT_KEY: e("CERT_KEY", "/run/secrets/cert.key")
 
     /* other */
 });

@@ -66,10 +66,13 @@ COPY artifacts/runtime/index.cjs index.cjs
 COPY artifacts/runtime/client client
 ARG SEMVER
 ENV SEMVER=${SEMVER}
+# VOLUME [ "/var/run/docker.sock", "/var/lib/docker/volumes", "/run/secrets/cert.crt", "/run/secrets/cert.key" ]
 HEALTHCHECK --interval=30s --timeout=1s --start-period=5s --retries=1 \
-    CMD if [ $(wget --no-check-certificate --server-response https://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}') -ne 200 ]; then exit 1; fi
-EXPOSE "55557/tcp"
-ENV CERTS_DIR=${CERTS_DIR:-/certs}
-# VOLUME [ "/var/run/docker.sock", "/var/lib/docker/volumes", "/certs" ]
+    CMD if [ -f "/run/secrets/cert.crt" ] && [ -f "/run/secrets/cert.key" ]; then \
+            if [ ! "$(wget --no-check-certificate --server-response https://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}')" = "200" ]; then exit 1; fi \
+        else \
+            if [ ! "$(wget --server-response http://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}')" = "200" ]; then exit 1; fi \
+        fi
+    EXPOSE "55557/tcp"
 ENTRYPOINT [ "node" ]
 CMD [ "index.cjs" ]
