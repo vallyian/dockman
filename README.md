@@ -53,7 +53,7 @@ npm --prefix server start
 docker run --name dockman-local --rm \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -v "/optional/certs/dir:/certs" \
+    -v "${HOME}/certs:/certs" \
     -p "127.0.0.1:55556:55557" \
     vallyian/dockman:local
 ```
@@ -67,7 +67,7 @@ docker run --name dockman-local --rm \
 docker run --name dockman --pull always --restart=always -d \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -v "/optional/certs/dir:/certs" \
+    -v "${HOME}/certs:/certs" \
     -p "127.0.0.1:55555:55557" \
     vallyian/dockman:latest
 ```
