@@ -1,10 +1,15 @@
 <div class="nav">
     <span class="left" *ngIf="!(['inspect', 'logs'].includes(view))">
-        <a href="#" (click)="view = 'images'" [ngClass]="{ active: view === 'images' }">Images ({{(data.images || []).length}})</a>
-        <a href="#" (click)="view = 'containers'" [ngClass]="{ active: view === 'containers' }">Containers ({{(data.containers || []).length}})</a>
-        <a href="#" (click)="view = 'volumes'" [ngClass]="{ active: view === 'volumes' }">Volumes ({{(data.volumes || []).length}})</a>
-        <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(data.networks || []).length}})</a>
-        <input type="text" placeholder="filter" id="filter" autofocus [(ngModel)]="filter.value" (ngModelChange)="updateFileter()">
+        <a href="#" (click)="view = 'images'" [ngClass]="{ active: view === 'images' }">Images ({{(data.images ||
+            []).length}})</a>
+        <a href="#" (click)="view = 'containers'" [ngClass]="{ active: view === 'containers' }">Containers
+            ({{(data.containers || []).length}})</a>
+        <a href="#" (click)="view = 'volumes'" [ngClass]="{ active: view === 'volumes' }">Volumes ({{(data.volumes ||
+            []).length}})</a>
+        <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(data.networks
+            || []).length}})</a>
+        <input type="text" placeholder="filter" id="filter" autofocus [(ngModel)]="filter.value"
+            (ngModelChange)="updateFileter()">
     </span>
     <span class="right" *ngIf="selected.items.length">
         <a href="#" *ngIf="selected.items.length === 1" (click)="inspect()" title="inspect">
@@ -51,8 +56,7 @@
             <tr *ngFor="let image of data.images; let row = index;" [ngClass]="{
                 inactive: image.REPOSITORY === '<none>' && image.TAG === '<none>',
                 select: selected.items.includes(image.ID)
-            }"
-                (click)="select(row, $event)">
+            }" (click)="select(row, $event)">
                 <!-- <td>{{image.ID}}</td> -->
                 <td>{{image.REPOSITORY}}</td>
                 <td>{{image.TAG}}</td>
@@ -83,8 +87,10 @@
                 <!-- <td>{{container.ID}}</td> -->
                 <td>{{container.IMAGE}}</td>
                 <td>{{container.NAMES}}</td>
-                <td><a *ngFor="let port of container.PORTS" [href]="(port.startsWith('443:') ? 'https:' : '') + '//localhost:' + port.split(':')[0]"
-                        target="_blank">{{port}}</a></td>
+                <td><span *ngFor="let port of container.PORTS; let i = index">
+                        <a [href]="(port.startsWith('443:') ? 'https:' : '') + '//localhost:' + port.split(':')[0]"
+                            target="_blank">{{port}}</a>{{i < container.PORTS.length - 1 ? ", " : "" }}</span>
+                </td>
                 <td>{{container.SIZE}}</td>
                 <!-- <td>{{container.COMMAND}}</td> -->
                 <td>{{container.STATUS}}</td>
@@ -139,7 +145,9 @@
             <td>{{entry.dt}}</td>
             <td [ngClass]="{ red: entry.err }">{{entry.log.replaceAll(" ", "&#160;")}}</td>
         </tr>
-        <tr><td colspan="2" id="logend"></td></tr>
+        <tr>
+            <td colspan="2" id="logend"></td>
+        </tr>
     </table>
 
 </div>
