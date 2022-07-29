@@ -13,21 +13,12 @@ export function imageLs(id?: string): Promise<Error | Image[]> {
             i.CREATED = time(i.CREATED);
             return i;
         }))
-        .then(i => i.sort((a, b) => {
-            let { REPOSITORY: ar, TAG: at } = a;
-            let { REPOSITORY: br, TAG: bt } = b;
-            if (ar === "<none>") ar = "~";
-            if (br === "<none>") br = "~";
-            if (at === "<none>") at = "~";
-            if (bt === "<none>") bt = "~";
-            ar = ar.toUpperCase();
-            br = br.toUpperCase();
-            if (ar < br) return -1;
-            if (ar > br) return 1;
-            if (at < bt) return -1;
-            if (at > bt) return 1;
-            return 0;
-        }))
+        .then(i => i.sort((a, b) => sort(
+            a.REPOSITORY === "<none>" ? "~" : a.REPOSITORY.toUpperCase(),
+            b.REPOSITORY === "<none>" ? "~" : b.REPOSITORY.toUpperCase(),
+            a.TAG === "<none>" ? "~" : a.TAG.toUpperCase(),
+            b.TAG === "<none>" ? "~" : b.TAG.toUpperCase()
+        )))
         .catch(asError);
 }
 
@@ -46,38 +37,20 @@ export function containerLs(): Promise<Error | Container[]> {
             c.SIZE = c.SIZE.replace("virtual ", "");
             return c;
         }))
-        .then(c => c.sort((a, b) => {
-            if (a.NAMES < b.NAMES) return -1;
-            if (a.NAMES > b.NAMES) return 1;
-            if (a.IMAGE < b.IMAGE) return -1;
-            if (a.IMAGE > b.IMAGE) return 1;
-            return 0;
-        }))
+        .then(n => n.sort((a, b) => sort(a.NAMES, b.NAMES, a.IMAGE, b.IMAGE)))
         .catch(asError);
 }
 
 export function volumeLs(): Promise<Error | Volume[]> {
     return ls_exec<Volume>("volume")
         .then(v => du_exec(v))
-        .then(v => v.sort((a, b) => {
-            if (a.NAME < b.NAME) return -1;
-            if (a.NAME > b.NAME) return 1;
-            if (a.DRIVER < b.DRIVER) return -1;
-            if (a.DRIVER > b.DRIVER) return 1;
-            return 0;
-        }))
+        .then(n => n.sort((a, b) => sort(a.NAME, b.NAME, a.DRIVER, b.DRIVER)))
         .catch(asError);
 }
 
 export function networkLs(): Promise<Error | Network[]> {
     return ls_exec<Network>("network", undefined, ["--no-trunc"])
-        .then(n => n.sort((a, b) => {
-            if (a.NAME < b.NAME) return -1;
-            if (a.NAME > b.NAME) return 1;
-            if (a.DRIVER < b.DRIVER) return -1;
-            if (a.DRIVER > b.DRIVER) return 1;
-            return 0;
-        }))
+        .then(n => n.sort((a, b) => sort(a.NAME, b.NAME, a.DRIVER, b.DRIVER)))
         .then(n => n.filter(n => n.NAME !== n.DRIVER && n.DRIVER !== "null"))
         .catch(asError);
 }
@@ -112,11 +85,7 @@ export function logs(id: string): Promise<Error | Log[]> {
             });
             return logsArr;
         })
-        .then(i => i.sort((a, b) => {
-            if (a.dt < b.dt) return -1;
-            if (a.dt > b.dt) return 1;
-            return 0;
-        }))
+        .then(i => i.sort((a, b) => sort(a.dt, b.dt)))
         .catch(asError);
 }
 
@@ -165,6 +134,16 @@ function time(val: string) {
         .replace(" weeks", "w")
         .replace(" months", "M")
         .replace(" years", "y");
+}
+
+function sort(aProp1: unknown, bProp1: unknown, aProp2?: unknown, bProp2?: unknown): -1 | 0 | 1 {
+    if (aProp1 < bProp1) return -1;
+    if (aProp1 > bProp1) return 1;
+    if (aProp2 !== undefined && bProp2 !== undefined) {
+        if (aProp2 < bProp2) return -1;
+        if (aProp2 > bProp2) return 1;
+    }
+    return 0;
 }
 
 async function du_exec(volumes: Volume[]) {
