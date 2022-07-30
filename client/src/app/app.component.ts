@@ -240,7 +240,7 @@ export class AppComponent implements AfterViewInit {
         });
     }
 
-    updateFileter() {
+    updateFilter() {
         if (this.view === "images")
             this.data.images = <Image[]>this.lsFilter(this._data.images);
         if (this.view === "containers")
@@ -249,6 +249,11 @@ export class AppComponent implements AfterViewInit {
             this.data.volumes = <Volume[]>this.lsFilter(this._data.volumes);
         if (this.view === "networks")
             this.data.networks = <Network[]>this.lsFilter(this._data.networks);
+    }
+
+    link(port: string): string {
+        return (port.startsWith("443:") ? "https:" : "") + "//" +
+            window.location.hostname + ":" + port.split(":")[0];
     }
 
     private ls(view: View | "*") {

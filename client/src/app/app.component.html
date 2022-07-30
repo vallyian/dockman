@@ -9,7 +9,7 @@
         <a href="#" (click)="view = 'networks'" [ngClass]="{ active: view === 'networks' }">Networks ({{(data.networks
             || []).length}})</a>
         <input type="text" placeholder="filter" id="filter" autofocus [(ngModel)]="filter.value"
-            (ngModelChange)="updateFileter()">
+            (ngModelChange)="updateFilter()">
     </span>
     <span class="right" *ngIf="selected.items.length">
         <a href="#" *ngIf="selected.items.length === 1" (click)="inspect()" title="inspect">
@@ -88,9 +88,7 @@
                 <td>{{container.IMAGE}}</td>
                 <td>{{container.NAMES}}</td>
                 <td><span *ngFor="let port of container.PORTS; let i = index">
-                        <a [href]="(port.startsWith('443:') ? 'https:' : '') + '//localhost:' + port.split(':')[0]"
-                            target="_blank">{{port}}</a>{{i < container.PORTS.length - 1 ? ", " : "" }}</span>
-                </td>
+                    <a [href]="link(port)" target="_blank">{{port}}</a>{{i < container.PORTS.length - 1 ? ", " : ""}}</span></td>
                 <td>{{container.SIZE}}</td>
                 <!-- <td>{{container.COMMAND}}</td> -->
                 <td>{{container.STATUS}}</td>
