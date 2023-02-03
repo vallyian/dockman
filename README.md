@@ -17,15 +17,11 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 
 ## Build
 
-```sh
-./run.sh build
-```
+`node run build`
 
 ## Scan for vulnerabilities
 
-```sh
-./run.sh scan
-```
+`node run scan`
 
 ## Run
 
@@ -35,36 +31,26 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 * local folders
 
 ```sh
-# first console
-npm --prefix client start
-# second console
 export CERT_CRT="/run/secrets/cert.crt" # optional
 export CERT_KEY="/run/secrets/cert.key" # optional
 export DEBUG="*" # optional
-npm --prefix server start
 ```
+
+`node run start`
 
 => [http://localhost:55557/](http://localhost:55557/)
 
 * local image
 
-```sh
-(docker stop dockman-local && docker rm dockman-local || echo "not running") && \
-docker run --name dockman-local --rm \
-    -v "/var/run/docker.sock:/var/run/docker.sock" \
-    -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
-    -v "${HOME}/certs/cert.crt:/run/secrets/cert.crt" `# optional` \
-    -v "${HOME}/certs/cert.key:/run/secrets/cert.key" `# optional` \
-    -p "127.0.0.1:55556:55557" \
-    vallyian/dockman:local
-```
+`node run start_docker`
 
 => [http://localhost:55556/](http://localhost:55556/)
 
 * public image
 
+`docker stop dockman && docker rm dockman || echo "not running"`
+
 ```sh
-(docker stop dockman && docker rm dockman || echo "not running") && \
 docker run --name dockman --pull always --restart=always -d \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \

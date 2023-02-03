@@ -2,19 +2,20 @@
 
 .angular
 # .github
-.vscode/**
+.vscode
 artifacts
-# !artifacts/runtime/index.cjs
-# !artifacts/runtime/client
+# !artifacts/runtime
 bin
+certs
 dist
 node_modules
 test-results
 
+.env
 # .dockerignore
 # .editorconfig
 # .gitattributes
 # .gitignore
 # [Dd]ocker*
-# run.sh
+# run
 # *.md
