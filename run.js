@@ -96,11 +96,15 @@ const PWD = process.cwd();
 * @param {{ out?: boolean, err?: boolean, cwd?: string }} options
 * @returns {child_process.ChildProcessWithoutNullStreams} childProcess.ChildProcessWithoutNullStreams
 */
-function exec(cmd, args, { out, err, cwd }) {
+function exec(cmd, args, opts = { out: true, err: true, cwd: process.cwd() }) {
     const actualCmd = cmd === "npm" && os.platform() === "win32" ? "npm.cmd" : cmd;
-    const child = child_process.spawn(actualCmd, (args || []).filter(c => c && !!(String(c).trim())), { shell: false, cwd: cwd || process.cwd() });
-    if (out !== false) child.stdout.pipe(process.stdout);
-    if (err !== false) child.stderr.pipe(process.stderr);
+    const child = child_process.spawn(
+        actualCmd,
+        (args || []).filter(c => c && !!(String(c).trim())),
+        { shell: false, cwd: opts && opts.cwd || process.cwd() }
+    );
+    if (opts && opts.out !== false) child.stdout.pipe(process.stdout);
+    if (opts && opts.err !== false) child.stderr.pipe(process.stderr);
     return child;
 }
 
@@ -112,8 +116,8 @@ function exec(cmd, args, { out, err, cwd }) {
  * @returns {Promise<void>} Promise<void>
  * @throws rejects with the exit code number
  */
-function execP(cmd, args, { out, err, cwd }) {
-    return new Promise((ok, reject) => exec(cmd, args, { out, err, cwd }).on("exit", code => code ? reject(code) : ok()));
+function execP(cmd, args, opts = { out: true, err: true, cwd: process.cwd() }) {
+    return new Promise((ok, reject) => exec(cmd, args, opts).on("exit", code => code ? reject(code) : ok()));
 }
 
 /**
