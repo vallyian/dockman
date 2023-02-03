@@ -17,7 +17,8 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 
 ## Build
 
-`node run build`
+* local folders `node run build`
+* in Docker `node run build-docker`
 
 ## Scan for vulnerabilities
 
@@ -42,7 +43,7 @@ export DEBUG="*" # optional
 
 * local image
 
-`node run start_docker`
+`node run start-docker`
 
 => [http://localhost:55556/](http://localhost:55556/)
 

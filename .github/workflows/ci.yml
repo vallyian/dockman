@@ -29,7 +29,7 @@ jobs:
               id: github_env
               env:
                   GITHUB_MAIN: ${{ github.ref == 'refs/heads/main' }}
-              run: node run ci_github_env
+              run: node run github-env
 
             - name: Tag version
               id: tag_version
@@ -46,7 +46,7 @@ jobs:
                   GITHUB_SHA: ${{ github.sha }}
                   GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
                   SEMVER: ${{ steps.tag_version.outputs.new_version }}
-              run: node run ci_calc_semver
+              run: node run semver
 
         outputs:
             GITHUB_MAIN: ${{ steps.github_env.outputs.GITHUB_MAIN }}
@@ -68,7 +68,7 @@ jobs:
             - uses: docker/setup-buildx-action@15c905b16b06416d2086efa066dd8e3a35cc7f98 # v2.4.0
 
             - name: Build, test and extract artifacts
-              run: node run ci_build
+              run: node run build-docker
 
             - name: Upload server runtime
               uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
@@ -85,7 +85,7 @@ jobs:
                   path: artifacts/test-results
 
             - name: Check test results
-              run: node run ci_check_test_results
+              run: node run check-test-results
 
             - name: Publish Test Results
               uses: EnricoMi/publish-unit-test-result-action@a3caf02865c0604ad3dc1ecfcc5cdec9c41b7936 # v2.3.0
@@ -98,7 +98,7 @@ jobs:
             - name: Scan runtime image
               env:
                   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-              run: node run ci_scan
+              run: node run scan
 
             - name: Log in to Docker Hub
               uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
@@ -111,4 +111,4 @@ jobs:
               if: ${{ needs.semver.outputs.GITHUB_MAIN == 'true' || github.event.inputs.publish_image == 'true' }}
               env:
                   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-              run: node run ci_push
+              run: node run push

@@ -88,7 +88,7 @@
                 <td>{{container.IMAGE}}</td>
                 <td>{{container.NAMES}}</td>
                 <td><span *ngFor="let port of container.PORTS; let i = index">
-                    <a [href]="link(port)" target="_blank">{{port}}</a>{{i < container.PORTS.length - 1 ? ", " : ""}}</span></td>
+                    <a [href]="link(port)" target="_blank" rel="noopener">{{port}}</a>{{i < container.PORTS.length - 1 ? ", " : ""}}</span></td>
                 <td>{{container.SIZE}}</td>
                 <!-- <td>{{container.COMMAND}}</td> -->
                 <td>{{container.STATUS}}</td>
