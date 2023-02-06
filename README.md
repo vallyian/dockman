@@ -17,12 +17,23 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 
 ## Build
 
-* local folders `node run build`
-* in Docker `node run build-docker`
+* local folders
+
+```sh
+node run build
+```
+
+* in Docker
+
+```sh
+node run build-docker
+```
 
 ## Scan for vulnerabilities
 
-`node run scan`
+```sh
+node run scan
+```
 
 ## Run
 
@@ -35,23 +46,25 @@ If you need a "prod ready" app for this, there are plenty (some open source) sol
 export CERT_CRT="/run/secrets/cert.crt" # optional
 export CERT_KEY="/run/secrets/cert.key" # optional
 export DEBUG="*" # optional
-```
 
-`node run start`
+node run start
+```
 
 => [http://localhost:55557/](http://localhost:55557/)
 
 * local image
 
-`node run start-docker`
+```sh
+node run start-docker
+```
 
 => [http://localhost:55556/](http://localhost:55556/)
 
 * public image
 
-`docker stop dockman && docker rm dockman || echo "not running"`
-
 ```sh
+docker stop dockman && docker rm dockman || echo "not running
+
 docker run --name dockman --pull always --restart=always -d \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
     -v "/var/lib/docker/volumes:/var/lib/docker/volumes" \
