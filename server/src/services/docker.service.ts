@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 
 import { globals } from "../../globals";
 import { Container, Image, Log, Network, Volume } from "../../../shared/interfaces";
+import { pipe } from "fp-ts/lib/function";
 
 type Part = "image" | "container" | "volume" | "network";
 type ContainerAction = "start" | "stop";
@@ -123,11 +124,16 @@ export function logs(id: string): Promise<Error | Log[]> {
 }
 
 export function rm(part: Part, id: string): Promise<Error | string> {
-    const flags = new Array<string | number>();
-    if (part === "image") flags.push("-f");
-    return docker_exec(part, "rm", [id], flags)
-        .then(r => asArray(r))
-        .then(r => r.filter(l => l === `Deleted: ${id}`) ? id : Promise.reject(r[0] || `response != ${id}`))
+    const getFlags = () => Promise.resolve(part === "image" ? ["-f"] : []);
+    const execRm = (flags: string[]) => docker_exec(part, "rm", [id], flags);
+    const checkResult = (r: string[]) => r.filter(l => l === `Deleted: ${id}`)
+        ? Promise.resolve(id)
+        : Promise.reject(r[0] || `response != ${id}`);
+
+    return getFlags()
+        .then(execRm)
+        .then(asArray)
+        .then(checkResult)
         .catch(asError);
 }
 
@@ -225,7 +231,14 @@ function exec(command: string[]): Promise<string> {
 }
 
 function asArray(input: string): string[] {
-    return input.split("\n").reduce((all, l) => { if (l.trim()) all.push(l); return all; }, new Array<string>());
+    const splitLines = (input: string) => input.split("\n");
+    const filterEmpty = (ss: string[]) => ss.reduce((acc: string[], s: string) => {
+        const trimmed = s.trim();
+        if (trimmed) acc.push(trimmed);
+        return [...acc];
+    }, []);
+
+    return pipe(input, splitLines, filterEmpty);
 }
 
 function asJson(input: unknown) {
