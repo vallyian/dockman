@@ -6,7 +6,6 @@ import { env } from "../env";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- last arg required by express to correctly interpret as error middleware
 export function errorMiddleware(err: Error, req: Request, res: Response, _next: NextFunction) {
     const status = err.status || 500;
-    const url = req.url;
     const omitted = "*omitted*";
     const safeErr = {
         message: err.message || "internal server error",
@@ -15,7 +14,6 @@ export function errorMiddleware(err: Error, req: Request, res: Response, _next: 
             .map(l => l.replace(err.message, "").trim())
             .filter(l => !!l && !/(?:[\\/]node_modules[\\/]|\(node:internal\/|^Error:$)/.test(l))),
         method: req.method,
-        url: url.replace(/(.+id_token=.+\..+\.)[^&]+(&.+)?/, `$1${omitted}$2`),
         status,
         headers: (() => {
             ["authorization", "cookie"].forEach(h => req.headers[h] && delete req.headers[h] && (req.headers[`${h}`] = omitted));
@@ -23,7 +21,7 @@ export function errorMiddleware(err: Error, req: Request, res: Response, _next: 
         })()
     };
 
-    if (!url.endsWith(".map"))
+    if (!req.url.endsWith(".map"))
         globals.console.error(safeErr);
 
     res.status(status)

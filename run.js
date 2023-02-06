@@ -57,7 +57,7 @@ const PWD = process.cwd();
             `--build-arg=SEMVER=${SEMVER}`,
             `--output=type=docker`,
             "."]),
-        () => execP("docker", ["image", "inspect", `${DOCKER_USERNAME}/${DOCKER_REPO}:local`], "ignore")
+        () => execP("docker", ["image", "inspect", `${DOCKER_USERNAME}/${DOCKER_REPO}:local`], { out: false })
     ),
 
     "check-test-results": () => void 0,
@@ -85,7 +85,7 @@ const PWD = process.cwd();
             (/* optional */ fs.existsSync(`${HOME}/certs/cert.crt`) ? `-v=${HOME}/certs/cert.crt:/run/secrets/cert.crt` : ""),
             (/* optional */ fs.existsSync(`${HOME}/certs/cert.key`) ? `-v=${HOME}/certs/cert.key:/run/secrets/cert.key` : ""),
             `-p=127.0.0.1:55556:55557`,
-            "vallyian/dockman:local"]),
+            "vallyian/dockman:local", "--inspect", "index.cjs"]),
     ),
 });
 

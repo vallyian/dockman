@@ -17,7 +17,7 @@ export function imageLs(id?: string) {
         a.TAG === "<none>" ? "~" : a.TAG.toUpperCase(),
         b.TAG === "<none>" ? "~" : b.TAG.toUpperCase()
     );
-    const sortImages = (is: Image[]) => is.sort(imageSorter);
+    const sortImages = (is: Image[]) => [...is].sort(imageSorter);
 
     return getImages()
         .then(mapImages)
@@ -30,8 +30,11 @@ export function containerLs() {
     const networkMapper = (c: Container) => {
         c.PORTS = (<string><unknown>c.PORTS).split(",")
             .reduce((ps, p) => {
-                const display = ((p.match(/\d+\.\d+\.\d+\.\d+:(\d+->\d+)\/tcp/) || [])[1] || "").replace("->", ":");
-                if (display) ps.push(display + (p.startsWith("127.0.0.1:") ? " (local)" : ""));
+                const parts = p.trim().split("/")[0].split(":");
+                const local = parts[0] === "127.0.0.1";
+                const [origin, target] = (parts[1] ?? parts[0]).split("->");
+                if (origin && target)
+                    ps.push(`${origin}:${target}` + (local ? " (local)" : ""));
                 return ps;
             }, new Array<string>());
         c.UP = /^Up /i.test(c.STATUS);
@@ -42,7 +45,7 @@ export function containerLs() {
     };
     const mapContainers = (cs: Container[]) => cs.map(networkMapper);
     const containerSorter = (a: Container, b: Container) => sort(a.NAMES, b.NAMES, a.IMAGE, b.IMAGE);
-    const sortContainers = (cs: Container[]) => cs.sort(containerSorter);
+    const sortContainers = (cs: Container[]) => [...cs].sort(containerSorter);
 
     return getContainers()
         .then(mapContainers)
@@ -54,7 +57,7 @@ export function volumeLs() {
     const getVolumes = () => ls_exec<Volume>("volume");
     const mapVolumes = (vs: Volume[]) => du_exec(vs);
     const volumeSorter = (a: Volume, b: Volume) => sort(a.NAME, b.NAME, a.DRIVER, b.DRIVER);
-    const sortVolumes = (vs: Volume[]) => vs.sort(volumeSorter);
+    const sortVolumes = (vs: Volume[]) => [...vs].sort(volumeSorter);
 
     return getVolumes()
         .then(mapVolumes)
@@ -65,7 +68,7 @@ export function volumeLs() {
 export function networkLs() {
     const getNetworks = () => ls_exec<Network>("network", undefined, ["--no-trunc"]);
     const networkSorter = (a: Network, b: Network) => sort(a.NAME, b.NAME, a.DRIVER, b.DRIVER);
-    const sortNetworks = (ns: Network[]) => ns.sort(networkSorter);
+    const sortNetworks = (ns: Network[]) => [...ns].sort(networkSorter);
     const networkFilterer = (n: Network) => n.NAME !== n.DRIVER && n.DRIVER !== "null";
     const filterNetworks = (ns: Network[]) => ns.filter(networkFilterer);
 
@@ -110,7 +113,7 @@ export function logs(id: string): Promise<Error | Log[]> {
         return ls;
     };
     const logSorter = (a: Log, b: Log) => sort(a.dt, b.dt);
-    const sortLogs = (ls: Log[]) => ls.sort(logSorter);
+    const sortLogs = (ls: Log[]) => [...ls].sort(logSorter);
 
     return getLogs()
         .then(asArray)
@@ -185,7 +188,10 @@ async function du_exec(volumes: Volume[]) {
         SIZE: (ss.find(s => s[1] === `/var/lib/docker/volumes/${v.NAME}/_data`) || [])[0] || "-"
     });
     const addVolumeSize = (ss: string[][]) => volumes.map(volumeMapper(ss));
-    const asError = (err: Error) => (globals.console.error(err), volumes.map(v => ({ ...v, SIZE: "-" })));
+    const asError = (err: Error) => {
+        globals.console.error(err);
+        return volumes.map(v => ({ ...v, SIZE: "-" }));
+    };
 
     return execAction()
         .then(asArray)
@@ -219,7 +225,7 @@ function exec(command: string[]): Promise<string> {
 }
 
 function asArray(input: string): string[] {
-    return input.split("\n").reduce((all, l) => { l.trim(); all.push(l); return all; }, new Array<string>());
+    return input.split("\n").reduce((all, l) => { if (l.trim()) all.push(l); return all; }, new Array<string>());
 }
 
 function asJson(input: unknown) {
