@@ -1,0 +1,10 @@
+/* cellspacing */
+table {
+    border-collapse: separate;
+    border-spacing: 0px;
+}
+
+/* cellpadding */
+table th,td {
+    padding: 05px;
+}

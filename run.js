@@ -41,7 +41,7 @@ const PWD = process.cwd();
 
     "semver": () => {
         SEMVER && GITHUB_SHA || term("invalid env vars")
-        var result = GITHUB_MAIN === "true" ? SEMVER : `${SEMVER}-${GITHUB_SHA}`;
+        const result = GITHUB_MAIN === "true" ? SEMVER : `${SEMVER}-${GITHUB_SHA}`;
         console.log(result);
         fs.appendFileSync(process.env["GITHUB_OUTPUT"], `SEMVER=${result}\n`, "utf-8")
     },

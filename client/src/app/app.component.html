@@ -42,10 +42,11 @@
 
 <div class="content" (click)="unselect($event)">
 
-    <table *ngIf="view === 'images'" cellspacing="0" cellpadding="0">
+    <table *ngIf="view === 'images'">
+        <caption>images</caption>
         <thead>
             <tr class="sticky">
-                <!-- <th>ID</th> -->
+                <th *ngIf="false">ID</th>
                 <th>REPOSITORY</th>
                 <th>TAG</th>
                 <th>SIZE</th>
@@ -57,7 +58,7 @@
                 inactive: image.REPOSITORY === '<none>' && image.TAG === '<none>',
                 select: selected.items.includes(image.ID)
             }" (click)="select(row, $event)">
-                <!-- <td>{{image.ID}}</td> -->
+                <td *ngIf="false">{{image.ID}}</td>
                 <td>{{image.REPOSITORY}}</td>
                 <td>{{image.TAG}}</td>
                 <td>{{image.SIZE}}</td>
@@ -66,15 +67,16 @@
         </tbody>
     </table>
 
-    <table *ngIf="view === 'containers'" cellspacing="0" cellpadding="0">
+    <table *ngIf="view === 'containers'">
+        <caption>containers</caption>
         <thead>
             <tr class="sticky">
-                <!-- <th>ID</th> -->
+                <th *ngIf="false">ID</th>
                 <th>IMAGE</th>
                 <th>NAME</th>
                 <th>PORTS</th>
                 <th>SIZE</th>
-                <!-- <th>COMMAND</th> -->
+                <th *ngIf="false">COMMAND</th>
                 <th>STATUS</th>
                 <th>CREATED</th>
             </tr>
@@ -84,20 +86,21 @@
                     inactive: !container.UP,
                     select: selected.items.includes(container.ID)
                  }" (click)="select(row, $event)">
-                <!-- <td>{{container.ID}}</td> -->
+                <td *ngIf="false">{{container.ID}}</td>
                 <td>{{container.IMAGE}}</td>
                 <td>{{container.NAMES}}</td>
                 <td><span *ngFor="let port of container.PORTS; let i = index">
                     <a [href]="link(port)" target="_blank" rel="noopener">{{port}}</a>{{i < container.PORTS.length - 1 ? ", " : ""}}</span></td>
                 <td>{{container.SIZE}}</td>
-                <!-- <td>{{container.COMMAND}}</td> -->
+                <td *ngIf="false">{{container.COMMAND}}</td>
                 <td>{{container.STATUS}}</td>
                 <td>{{container.CREATED}}</td>
             </tr>
         </tbody>
     </table>
 
-    <table *ngIf="view === 'volumes'" cellspacing="0" cellpadding="0">
+    <table *ngIf="view === 'volumes'">
+        <caption>volumes</caption>
         <thead>
             <tr class="sticky">
                 <th>NAME</th>
@@ -115,22 +118,23 @@
         </tbody>
     </table>
 
-    <table *ngIf="view === 'networks'" cellspacing="0" cellpadding="0">
+    <table *ngIf="view === 'networks'">
+        <caption>networks</caption>
         <thead>
             <tr class="sticky">
-                <!-- <th>ID</th> -->
+                <th *ngIf="false">ID</th>
                 <th>NAME</th>
                 <th>DRIVER</th>
-                <!-- <th>SCOPE</th> -->
+                <th *ngIf="false">SCOPE</th>
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let network of data.networks; let row = index;"
                 [ngClass]="{ select: selected.items.includes(network.ID) }" (click)="select(row, $event)">
-                <!-- <td>{{network.ID}}</td> -->
+                <td *ngIf="false">{{network.ID}}</td>
                 <td>{{network.NAME}}</td>
                 <td>{{network.DRIVER}}</td>
-                <!-- <td>{{network.SCOPE}}</td> -->
+                <td *ngIf="false">{{network.SCOPE}}</td>
             </tr>
         </tbody>
     </table>
@@ -140,6 +144,8 @@
     </ngx-json-viewer>
 
     <table *ngIf="view === 'logs' && data.logs" class="logs">
+        <caption>logs</caption>
+        <thead *ngIf="false"><tr><th>date/time</th><th>log</th></tr></thead>
         <tr *ngFor="let entry of data.logs">
             <td>{{entry.dt}}</td>
             <td [ngClass]="{ red: entry.err }">{{entry.log.replaceAll(" ", "&#160;")}}</td>

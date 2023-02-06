@@ -85,18 +85,13 @@ function starListen(app: Application) {
 }
 
 function getCert(): { cert?: Buffer, key?: Buffer, warns: string[] } {
-    let [cert, key,] = [undefined, undefined];
+    const [cert, key] = [env.CERT_CRT, env.CERT_KEY]
+        .map(path.normalize)
+        .map(f => fs.existsSync(f) && fs.statSync(f).isFile() ? fs.readFileSync(f) : undefined);
+
     const warns = [];
-
-    const crtPath = path.normalize(env.CERT_CRT);
-    fs.existsSync(crtPath) && fs.statSync(crtPath).isFile()
-        ? cert = fs.readFileSync(crtPath)
-        : warns.push(`cert file "${crtPath}" not found`);
-
-    const keyPath = path.normalize(env.CERT_KEY);
-    fs.existsSync(keyPath) && fs.statSync(keyPath).isFile()
-        ? key = fs.readFileSync(keyPath)
-        : warns.push(`cert key file "${keyPath}" not found`);
+    if (!cert) warns.push(`cert file "${env.CERT_CRT}" not found`);
+    if (!key) warns.push(`cert key file "${env.CERT_KEY}" not found`);
 
     return { cert, key, warns };
 }

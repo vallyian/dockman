@@ -25,7 +25,7 @@ runner.addReporter(
     new JUnitXmlReporter({
         savePath: "./test-results",
         consolidateAll: false,
-        filePrefix: name.replace(/[^a-zA-Z0-9]/g, "") + "_" + new Date().toISOString().replace(/[^0-9]/g, "_")
+        filePrefix: name.replace(/[^a-zA-Z0-9]/g, "") + "_" + new Date().toISOString().replace(/\D/g, "_")
     })
 );
 
