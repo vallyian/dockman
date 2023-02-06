@@ -26,6 +26,7 @@
         "build": "esbuild src/index.ts --bundle --minify --platform=node --target=node16 --outfile=bin/index.cjs",
         "pretest": "node -e \"fs.rmSync('test-results', { recursive: true, force: true })\" && npm run ci",
         "test": "node -e \"require('esbuild-register/dist/node').register(); require('./test.ts')\"",
+        "test:debug": "npm run test -- --inspect",
         "prestart": "npm run build -- --sourcemap",
         "start": "node -e \"process.env.NODE_ENV='development'; process.env.PORT=55556; child_process.execSync('node bin/index.cjs', {stdio:'inherit'})\""
     },

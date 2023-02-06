@@ -19,7 +19,7 @@ export const env = Object.freeze({
 function e(env: string, required: ErrorConstructor | string): string {
     const val = globals.process.env[env];
     switch (true) {
-        case val !== "undefined": return String(val).trim();
+        case typeof val !== "undefined": return String(val).trim();
         case (<ErrorConstructor>required).name === "Error": return assert.fail(`env var ${env} not set`);
         default: return <string>required;
     }
