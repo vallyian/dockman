@@ -59,21 +59,20 @@ COPY --from=build-client /app/test-results /test-results
 
 
 
-FROM docker:23.0.0-alpine3.17
+FROM docker:23.0.0-alpine3.17 AS runtime
 RUN rm -rf /usr/libexec/docker/cli-plugins/docker-compose /usr/libexec/docker/cli-plugins/docker-buildx && \
     apk add nodejs-lts npm
 WORKDIR /app
-COPY --from=export /runtime/index.cjs index.cjs
-COPY --from=export /runtime/client client
+COPY artifacts/runtime .
 ARG SEMVER
 ENV SEMVER=${SEMVER}
 # VOLUME [ "/var/run/docker.sock", "/var/lib/docker/volumes", "/run/secrets/cert.crt", "/run/secrets/cert.key" ]
 HEALTHCHECK --interval=30s --timeout=1s --start-period=5s --retries=1 \
     CMD if [ -f "/run/secrets/cert.crt" ] && [ -f "/run/secrets/cert.key" ]; then \
-            if [ ! "$(wget --no-check-certificate --server-response https://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}')" = "200" ]; then exit 1; fi \
-        else \
-            if [ ! "$(wget --server-response http://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}')" = "200" ]; then exit 1; fi \
-        fi
-    EXPOSE "55557/tcp"
+    if [ ! "$(wget --no-check-certificate --server-response https://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}')" = "200" ]; then exit 1; fi \
+    else \
+    if [ ! "$(wget --server-response http://localhost:55557/health 2>&1 | awk '/^  HTTP/{print $2}')" = "200" ]; then exit 1; fi \
+    fi
+EXPOSE "55557/tcp"
 ENTRYPOINT [ "node" ]
 CMD [ "index.cjs" ]

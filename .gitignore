@@ -4,6 +4,7 @@
 # .github
 .vscode
 artifacts
+# !artifacts/runtime
 bin
 certs
 dist

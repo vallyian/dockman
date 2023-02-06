@@ -43,7 +43,7 @@
 <div class="content" (click)="unselect($event)">
 
     <table *ngIf="view === 'images'">
-        <caption>images</caption>
+        <caption *ngIf="false">images</caption>
         <thead>
             <tr class="sticky">
                 <th *ngIf="false">ID</th>
@@ -68,7 +68,7 @@
     </table>
 
     <table *ngIf="view === 'containers'">
-        <caption>containers</caption>
+        <caption *ngIf="false">containers</caption>
         <thead>
             <tr class="sticky">
                 <th *ngIf="false">ID</th>
@@ -100,7 +100,7 @@
     </table>
 
     <table *ngIf="view === 'volumes'">
-        <caption>volumes</caption>
+        <caption *ngIf="false">volumes</caption>
         <thead>
             <tr class="sticky">
                 <th>NAME</th>
@@ -119,7 +119,7 @@
     </table>
 
     <table *ngIf="view === 'networks'">
-        <caption>networks</caption>
+        <caption *ngIf="false">networks</caption>
         <thead>
             <tr class="sticky">
                 <th *ngIf="false">ID</th>
@@ -144,7 +144,7 @@
     </ngx-json-viewer>
 
     <table *ngIf="view === 'logs' && data.logs" class="logs">
-        <caption>logs</caption>
+        <caption *ngIf="false">logs</caption>
         <thead *ngIf="false"><tr><th>date/time</th><th>log</th></tr></thead>
         <tr *ngFor="let entry of data.logs">
             <td>{{entry.dt}}</td>
