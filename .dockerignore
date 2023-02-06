@@ -4,17 +4,17 @@
 .github
 .vscode
 artifacts
-!artifacts/runtime/index.cjs
-!artifacts/runtime/client
 bin
+certs
 dist
 node_modules
 test-results
 
+.env
 .dockerignore
 .editorconfig
 .gitattributes
 .gitignore
 [Dd]ocker*
-run.sh
+run.js
 *.md

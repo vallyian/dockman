@@ -54,16 +54,17 @@ RUN npm test
 FROM scratch as export
 COPY --from=build-server /app/bin /runtime
 COPY --from=build-client /app/dist /runtime/client
+COPY --from=build-server /app/test-results /test-results
+COPY --from=build-client /app/test-results /test-results
 
 
 
-# TODO: use 22 after beta ends: 22.06.0-beta.0-alpine3.16
-FROM docker:20.10.17-alpine3.16
+FROM docker:23.0.0-alpine3.17
 RUN rm -rf /usr/libexec/docker/cli-plugins/docker-compose /usr/libexec/docker/cli-plugins/docker-buildx && \
     apk add nodejs-lts npm
 WORKDIR /app
-COPY artifacts/runtime/index.cjs index.cjs
-COPY artifacts/runtime/client client
+COPY --from=export /runtime/index.cjs index.cjs
+COPY --from=export /runtime/client client
 ARG SEMVER
 ENV SEMVER=${SEMVER}
 # VOLUME [ "/var/run/docker.sock", "/var/lib/docker/volumes", "/run/secrets/cert.crt", "/run/secrets/cert.key" ]
